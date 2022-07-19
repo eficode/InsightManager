@@ -1,4 +1,4 @@
-package customEficodeLibraries.insightmanager
+package com.eficode.atlassian.insightmanager
 
 import com.atlassian.jira.component.ComponentAccessor
 import com.atlassian.jira.config.properties.APKeys

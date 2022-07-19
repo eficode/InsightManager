@@ -13,7 +13,7 @@
         <url>https://www.eficode.com/</url>
     </organization>
 
-    <name>FlexCapacitor</name>
+    <name>InsightManager</name>
 
     <parent>
         <groupId>com.adaptavist.pom</groupId>
@@ -50,12 +50,6 @@
             <version>${insight.core.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!--dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>2.5.17</version>
-            <type>pom</type>
-        </dependency-->
     </dependencies>
 
     <!--build>
@@ -90,6 +84,7 @@
 
 
     <repositories>
+
         <!-- This is required to find the parent pom and ScriptRunner dependencies -->
         <repository>
             <id>adaptavist-external</id>
