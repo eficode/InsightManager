@@ -6,6 +6,7 @@ import com.atlassian.jira.config.util.JiraHome
 import com.atlassian.jira.security.JiraAuthenticationContext
 import com.atlassian.jira.user.ApplicationUser
 import com.atlassian.jira.web.ExecutingHttpRequest
+import com.onresolve.scriptrunner.runner.customisers.WithPlugin
 import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ConfigureFacadeImpl
 import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.IQLFacadeImpl
 import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ImportSourceConfigurationFacadeImpl
@@ -57,6 +58,7 @@ import java.time.LocalDateTime
  *
  */
 
+@WithPlugin()
 class InsightManagerForScriptrunner {
 
     Logger log
