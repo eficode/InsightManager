@@ -58,7 +58,7 @@ import java.time.LocalDateTime
  *
  */
 
-@WithPlugin()
+@WithPlugin("com.riadalabs.jira.plugins.insight")
 class InsightManagerForScriptrunner {
 
     Logger log
