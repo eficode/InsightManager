@@ -393,10 +393,10 @@ class InsightManagerForScriptrunner {
         } else {
 
             try {
-                long attributeBeanId = objectFacade.loadObjectAttributeBean(objectBean.id, attribute)?.id
-                if (attributeBeanId != null) {
+                ObjectAttributeBean attributeBean = objectFacade.loadObjectAttributeBean(objectBean.id, attribute)
+                if (attributeBean != null) {
 
-                    objectFacade.deleteObjectAttributeBean(attributeBeanId, this.eventDispatchOption)
+                    objectFacade.deleteObjectAttributeBean(attributeBean.id, this.eventDispatchOption)
 
                 } else {
                     log.debug("\tAttribute is already empty")

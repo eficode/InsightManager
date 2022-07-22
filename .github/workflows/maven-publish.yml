@@ -30,7 +30,7 @@ jobs:
     #Manually first (once) set up an orphaned branch:
     # git switch --orphan packages
     # git commit --allow-empty -m "Initial commit on packages branch"
-    # git push github packages:packages
+    # git push origin packages:packages
 
     - name: Install Package to packages branch
       run: |  
