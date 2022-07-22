@@ -393,7 +393,7 @@ class InsightManagerForScriptrunner {
         } else {
 
             try {
-                long attributeBeanId = objectFacade.loadObjectAttributeBean(objectBean.id, attribute).id
+                long attributeBeanId = objectFacade.loadObjectAttributeBean(objectBean.id, attribute)?.id
                 if (attributeBeanId != null) {
 
                     objectFacade.deleteObjectAttributeBean(attributeBeanId, this.eventDispatchOption)
