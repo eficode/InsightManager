@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>com.eficode.atlassian</groupId>
+  <artifactId>insightmanager</artifactId>
+  <versioning>
+    <lastUpdated>20220722092839</lastUpdated>
+    <snapshot>
+      <localCopy>true</localCopy>
+    </snapshot>
+    <snapshotVersions>
+      <snapshotVersion>
+        <classifier>sources</classifier>
+        <extension>jar</extension>
+        <value>2.0.1-SNAPSHOT</value>
+        <updated>20220722092839</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>jar</extension>
+        <value>2.0.1-SNAPSHOT</value>
+        <updated>20220722092839</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>2.0.1-SNAPSHOT</value>
+        <updated>20220722092839</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+  <version>2.0.1-SNAPSHOT</version>
+</metadata>
