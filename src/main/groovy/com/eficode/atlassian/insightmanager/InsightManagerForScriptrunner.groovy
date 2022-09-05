@@ -11,6 +11,7 @@ import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.Confi
 import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.IQLFacadeImpl
 import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ImportSourceConfigurationFacadeImpl
 import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectFacadeImpl
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectSchemaFacadeImpl
 import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectTicketFacadeImpl
 import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectTypeAttributeFacadeImpl
 import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectTypeFacadeImpl
@@ -23,17 +24,22 @@ import com.riadalabs.jira.plugins.insight.services.model.AttachmentBean
 import com.riadalabs.jira.plugins.insight.services.model.CommentBean
 import com.riadalabs.jira.plugins.insight.services.model.MutableObjectAttributeBean
 import com.riadalabs.jira.plugins.insight.services.model.MutableObjectBean
+import com.riadalabs.jira.plugins.insight.services.model.MutableObjectSchemaBean
 import com.riadalabs.jira.plugins.insight.services.model.MutableObjectTypeAttributeBean
+import com.riadalabs.jira.plugins.insight.services.model.MutableObjectTypeBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectAttributeBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectAttributeValueBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectHistoryBean
+import com.riadalabs.jira.plugins.insight.services.model.ObjectSchemaBean
+import com.riadalabs.jira.plugins.insight.services.model.ObjectSchemaPropertyBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeAttributeBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeBean
 import com.riadalabs.jira.plugins.insight.services.model.factory.ObjectAttributeBeanFactory
 import com.riadalabs.jira.plugins.insight.services.model.factory.ObjectAttributeBeanFactoryImpl
 import com.riadalabs.jira.plugins.insight.services.progress.model.Progress
 import com.riadalabs.jira.plugins.insight.services.progress.model.ProgressId
+import io.riada.insight.api.graphql.resolvers.objectschema.ObjectSchema
 import org.apache.log4j.Logger
 import org.joda.time.DateTime
 
@@ -62,6 +68,8 @@ import java.time.LocalDateTime
 class InsightManagerForScriptrunner {
 
     Logger log
+    Class objectSchemaFacadeClass
+    ObjectSchemaFacadeImpl objectSchemaFacade
     Class objectFacadeClass
     ObjectFacadeImpl objectFacade
     Class iqlFacadeClass
@@ -97,6 +105,7 @@ class InsightManagerForScriptrunner {
 
 
         //The facade classes
+        objectSchemaFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectSchemaFacade")
         objectFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectFacade")
         objectTypeFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectTypeFacade")
         objectTypeAttributeFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectTypeAttributeFacade")
@@ -108,6 +117,7 @@ class InsightManagerForScriptrunner {
         configureFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ConfigureFacade")
 
         //The facade instances
+        objectSchemaFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectSchemaFacadeClass) as ObjectSchemaFacadeImpl
         objectFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectFacadeClass) as ObjectFacadeImpl
         objectTypeFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectTypeFacadeClass) as ObjectTypeFacadeImpl
         objectTypeAttributeFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectTypeAttributeFacadeClass) as ObjectTypeAttributeFacadeImpl
@@ -1481,6 +1491,86 @@ class InsightManagerForScriptrunner {
         return success
 
 
+    }
+
+    void test() {
+        MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean().tap {
+            name = ""
+            it.setType(ObjectTypeAttributeBean.Type.USER)
+        }
+        objectTypeAttributeFacade.storeObjectTypeAttributeBean()
+    }
+
+    /**
+     * Create a new objectType
+     * @param name
+     * @param schemaId
+     * @param description (optional)
+     * @param parentTypeId (optional)
+     * @return the new ObjectTypeBean or if in readOnly the yet to be stored MutableObjectTypeBean
+     */
+    ObjectTypeBean createObjectType(String name, int schemaId, String description = "", Integer parentTypeId = null) {
+        MutableObjectTypeBean mutableObjectTypeBean = new MutableObjectTypeBean().tap {objectType ->
+            objectType.name = name
+            objectType.objectSchemaId = schemaId
+            objectType.description = description
+            objectType.parentObjectTypeId = parentTypeId
+        }
+
+        if (readOnly) {
+            return mutableObjectTypeBean
+        }
+        ObjectTypeBean objectTypeBean = objectTypeFacade.createObjectTypeBean(mutableObjectTypeBean)
+
+        return objectTypeBean
+
+    }
+
+    /**
+     * Will create a new object schema
+     * @param name Name of new schema
+     * @param key Key of new schema
+     * @param description (optional)
+     * @param allowOtherObjectSchema Should other schemas be allowed to reference this schema
+     * @param serviceDescCustomersEnabled Should JSM customers have access to this schema
+     * @return the new ObjectSchemaBean or MutableObjectSchemaBean if readOnly
+     */
+    ObjectSchemaBean createObjectSchema(String name, String key, String description = "", boolean allowOtherObjectSchema = false, boolean serviceDescCustomersEnabled = false) {
+
+        MutableObjectSchemaBean schemaBean = new MutableObjectSchemaBean().tap { schema ->
+            schema.name = name
+            schema.objectSchemaKey = key
+            schema.description = description
+        }
+
+        if (readOnly) {
+            return schemaBean
+        }
+
+        ObjectSchemaBean newSchema = objectSchemaFacade.storeObjectSchemaBean(schemaBean)
+
+        //Properties must be set after creation
+        ObjectSchemaPropertyBean propertyBean = newSchema.objectSchemaPropertyBean
+        propertyBean.setAllowOtherObjectSchema(allowOtherObjectSchema)
+        propertyBean.setServiceDescCustomersEnabled(serviceDescCustomersEnabled)
+        objectSchemaFacade.storeObjectSchemaProperty(newSchema.id, propertyBean)
+
+        return objectSchemaFacade.loadObjectSchema(newSchema.id)
+
+    }
+    /**
+     * Delete an object schema and all of its objects
+     * @param id
+     * @return true on success or when in readOnly mode
+     */
+    boolean deleteObjectSchema(int id) {
+
+        if (readOnly) {
+            return true
+        }
+
+        objectSchemaFacade.deleteObjectSchemaBean(id)
+        return objectSchemaFacade.findObjectSchemaBeans().findAll { it.id == id }.empty
     }
 
 
