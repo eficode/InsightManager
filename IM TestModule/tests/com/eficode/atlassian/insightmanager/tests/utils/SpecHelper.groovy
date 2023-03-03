@@ -1,11 +1,14 @@
 package com.eficode.atlassian.insightmanager.tests.utils
 
-import com.eficode.atlassian.jiraInstanceManger.JiraInstanceMangerRest
-import com.eficode.atlassian.jiraInstanceManger.beans.ObjectSchemaBean
-import com.eficode.atlassian.jiraInstanceManger.beans.ProjectBean
+import com.eficode.atlassian.jiraInstanceManager.JiraInstanceManagerRest
+
+import com.eficode.atlassian.jiraInstanceManager.beans.ObjectSchemaBean
+import com.eficode.atlassian.jiraInstanceManager.beans.ProjectBean
 import kong.unirest.Cookie
 import kong.unirest.Cookies
 import kong.unirest.Unirest
+
+
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 
@@ -13,11 +16,13 @@ class SpecHelper {
 
     
     Logger log = Logger.getLogger(this.class)
-    JiraInstanceMangerRest jiraR
+    JiraInstanceManagerRest jiraR
     
     String baseUrl
     String restAdmin
     String restPassword
+
+
 
     Cookies sudoCookies
     SpecHelper(String baseUrl, String restAdmin, String restPassword) {
@@ -26,7 +31,7 @@ class SpecHelper {
         this.restPassword = restPassword
 
         Unirest.config().defaultBaseUrl(this.baseUrl).setDefaultBasicAuth(this.restAdmin, this.restPassword)
-        jiraR = new JiraInstanceMangerRest(this.restAdmin, this.restPassword, this.baseUrl)
+        jiraR = new JiraInstanceManagerRest(this.restAdmin, this.restPassword, this.baseUrl)
 
         sudoCookies = jiraR.acquireWebSudoCookies()
 
@@ -45,6 +50,8 @@ class SpecHelper {
         ObjectSchemaBean schemaBean = resultMap.schema as ObjectSchemaBean
         return [project:projectBean, schema:schemaBean]
     }
+
+
 
 
 

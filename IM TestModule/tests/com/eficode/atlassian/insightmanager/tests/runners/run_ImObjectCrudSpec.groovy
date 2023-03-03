@@ -2,17 +2,17 @@ package com.eficode.atlassian.insightmanager.tests.runners
 
 /**
  * Used to run spec ImObjectCrudSpec.groovy
- * Presumes _setupSpecEnv.groovy has been setup
+ * Presumes setupSpecEnv.groovy has been setup
  */
 
-import com.eficode.atlassian.jiraInstanceManger.JiraInstanceMangerRest
+import com.eficode.atlassian.jiraInstanceManager.JiraInstanceManagerRest
 import org.apache.groovy.json.internal.LazyMap
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-String jiraBaseUrl = "http://jira.test.com:8080"
+String jiraBaseUrl = "http://jira.localhost:8080"
 Logger log = LoggerFactory.getLogger("ImObjectCrudSpec.runner")
-JiraInstanceMangerRest jiraR = new JiraInstanceMangerRest()
+JiraInstanceManagerRest jiraR = new JiraInstanceManagerRest()
 jiraR.baseUrl = jiraBaseUrl
 
 jiraR.installGrapeDependency("com.konghq", "unirest-java", "3.13.6", "", "standalone")

@@ -25,7 +25,7 @@
 
     <properties>
         <!-- Set your JIRA version here -->
-        <jira.version>8.0.0</jira.version>
+        <jira.version>8.22.0</jira.version>
         <!-- Get Insight Version from: https://packages.atlassian.com/mvn/maven-atlassian-external/com/riadalabs/jira/plugins/insight/ -->
         <insight.version>9.0.7</insight.version>
         <!-- Get Insight Core Version from: https://packages.atlassian.com/mvn/maven-atlassian-external/com/riadalabs/insight-core-model/ -->
@@ -41,7 +41,7 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy</artifactId>
-            <version>2.5.14</version>
+            <version>3.0.11</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -155,7 +155,7 @@
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy</artifactId>
-                        <version>2.5.14</version>
+                        <version>3.0.11</version>
                         <scope>runtime</scope>
                     </dependency>
                 </dependencies>

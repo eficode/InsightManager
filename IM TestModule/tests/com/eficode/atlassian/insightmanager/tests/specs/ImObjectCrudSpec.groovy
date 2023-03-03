@@ -8,8 +8,8 @@ package com.eficode.atlassian.insightmanager.tests.specs
 
 import com.eficode.atlassian.insightmanager.InsightManagerForScriptrunner
 import com.eficode.atlassian.insightmanager.tests.utils.SpecHelper
-import com.eficode.atlassian.jiraInstanceManger.beans.ObjectSchemaBean
-import com.eficode.atlassian.jiraInstanceManger.beans.ProjectBean
+import com.eficode.atlassian.jiraInstanceManager.beans.ObjectSchemaBean
+import com.eficode.atlassian.jiraInstanceManager.beans.ProjectBean
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import spock.lang.Shared

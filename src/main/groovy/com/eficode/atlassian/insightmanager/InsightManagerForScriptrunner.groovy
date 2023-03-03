@@ -22,6 +22,7 @@ import com.riadalabs.jira.plugins.insight.services.events.EventDispatchOption
 import com.riadalabs.jira.plugins.insight.services.imports.model.ImportSource
 import com.riadalabs.jira.plugins.insight.services.model.AttachmentBean
 import com.riadalabs.jira.plugins.insight.services.model.CommentBean
+import com.riadalabs.jira.plugins.insight.services.model.IconBean
 import com.riadalabs.jira.plugins.insight.services.model.MutableObjectAttributeBean
 import com.riadalabs.jira.plugins.insight.services.model.MutableObjectBean
 import com.riadalabs.jira.plugins.insight.services.model.MutableObjectSchemaBean
@@ -1493,13 +1494,33 @@ class InsightManagerForScriptrunner {
 
     }
 
-    void test() {
-        MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean().tap {
-            name = ""
-            it.setType(ObjectTypeAttributeBean.Type.USER)
+
+    /**
+     * Get an IconBean that is either avilable in a schema or globally.
+     * If two matches are found, the icon from the matching schema will be preferred.
+     * @param iconName Name of the icon
+     * @param schemaId Id of the schema
+     * @return an IconBean object, or null if not found
+     */
+    IconBean getIconBean(String iconName, int schemaId) {
+
+        log.info("Getting IconBean with name $iconName that is available globally or in schema $schemaId")
+
+        ArrayList<IconBean> iconBeans = configureFacade.findAllIconBeans(schemaId).findAll {it.name == iconName}
+        log.debug("\tFound ${iconBeans.size()} matching iconBeans")
+        IconBean matchingBean = iconBeans.size() == 1 ? iconBeans.first()  : iconBeans.find {it.objectSchemaId == schemaId}
+
+        if (iconBeans.size() == 1) {
+            log.info("\tReturning bean ${matchingBean.name} (${matchingBean.id}) from schema: ${matchingBean.objectSchemaId}")
+            return iconBeans.first()
+        }else if (iconBeans.size() > 1) {
+            log.info("\tFound multiple matching icons, returning bean ${matchingBean.name} (${matchingBean.id}) from schema: ${matchingBean.objectSchemaId}")
+            return iconBeans.find {it.objectSchemaId == schemaId}
         }
-        objectTypeAttributeFacade.storeObjectTypeAttributeBean()
+        log.warn("\tCould not find iconBean with name $iconName")
+        return null
     }
+
 
     /**
      * Create a new objectType
@@ -1509,12 +1530,13 @@ class InsightManagerForScriptrunner {
      * @param parentTypeId (optional)
      * @return the new ObjectTypeBean or if in readOnly the yet to be stored MutableObjectTypeBean
      */
-    ObjectTypeBean createObjectType(String name, int schemaId, String description = "", Integer parentTypeId = null) {
+    ObjectTypeBean createObjectType(String name, int schemaId, IconBean iconBean, String description = "", Integer parentTypeId = null, ArrayList<MutableObjectTypeAttributeBean> attributeBeans = []) {
         MutableObjectTypeBean mutableObjectTypeBean = new MutableObjectTypeBean().tap {objectType ->
             objectType.name = name
             objectType.objectSchemaId = schemaId
             objectType.description = description
             objectType.parentObjectTypeId = parentTypeId
+            objectType.iconBean = iconBean
         }
 
         if (readOnly) {
@@ -1522,9 +1544,32 @@ class InsightManagerForScriptrunner {
         }
         ObjectTypeBean objectTypeBean = objectTypeFacade.createObjectTypeBean(mutableObjectTypeBean)
 
+        log.info("Created Object Type:${objectTypeBean.name } (${objectTypeBean.id})")
+        if (attributeBeans) {
+            log.info("\tCreating ${attributeBeans.size()} attributes for the object")
+            attributeBeans.each {attributeBean  ->
+                log.debug("\t"*2 + "Creating attribute ${attributeBean.name} (${attributeBean.type.name()}-${attributeBean.defaultType.name()})")
+                ObjectTypeAttributeBean newAttribute =  objectTypeAttributeFacade.storeObjectTypeAttributeBean(attributeBean, objectTypeBean.id)
+                log.debug("\t"*3 + "Created attribute:" + newAttribute.id)
+            }
+
+
+        }
+
+
         return objectTypeBean
 
     }
+
+    /**
+     * Get object schema based on key
+     * @param schemaKey Key of the object schema
+     * @return The corresponding ObjectSchemaBean or null if not found
+     */
+    ObjectSchemaBean getObjectSchema(String schemaKey) {
+        return objectSchemaFacade.findObjectSchemaBeans().find {it.objectSchemaKey == schemaKey}
+    }
+
 
     /**
      * Will create a new object schema
@@ -1565,13 +1610,55 @@ class InsightManagerForScriptrunner {
      */
     boolean deleteObjectSchema(int id) {
 
+        log.info("Deleting ObjectSchema with id: $id")
         if (readOnly) {
+            log.info("\tCurrently in read only, wont delete")
             return true
         }
 
         objectSchemaFacade.deleteObjectSchemaBean(id)
-        return objectSchemaFacade.findObjectSchemaBeans().findAll { it.id == id }.empty
+        if (objectSchemaFacade.findObjectSchemaBeans().findAll { it.id == id }.empty) {
+            log.info("\tObjectSchema was deleted")
+            return true
+        } else {
+            log.warn("\tFailed to delete object schema ${id}")
+            return false
+        }
     }
+
+    /**
+     * Delete an object schema with a matching name AND key
+     * @param schemaName The name of the schema to delete
+     * @param schemaKey THe key of the schema to delete
+     * @return true on success or when in readOnly mode, false if the schema wasn't found or successfully deleted
+     */
+    boolean deleteObjectSchema(String schemaName, String schemaKey) {
+
+       log.info("Deleting ObjectSchema with name: $schemaName, and key: $schemaKey")
+        if (readOnly) {
+            log.info("\tCurrently in read only, wont delete")
+            return true
+        }
+
+        ObjectSchemaBean schemaBean = objectSchemaFacade.findObjectSchemaBeans().find { it.name == schemaName && it.objectSchemaKey == schemaKey }
+
+        if (!schemaBean) {
+            log.warn("\tCould not find ObjectSchema with name: $schemaName, and key: $schemaKey. Nothing was deleted")
+            return false
+        }
+
+        objectSchemaFacade.deleteObjectSchemaBean(schemaBean.id)
+        if (objectSchemaFacade.findObjectSchemaBeans().findAll { it.id == schemaBean.id }.empty) {
+            log.info("\tObjectSchema was deleted")
+            return true
+        } else {
+            log.warn("\tFailed to delete object schema ${schemaBean.id}")
+            return false
+        }
+
+    }
+
+
 
 
     void logRelevantStacktrace(StackTraceElement[] stacktrace) {
