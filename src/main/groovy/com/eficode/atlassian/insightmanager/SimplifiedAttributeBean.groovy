@@ -206,8 +206,10 @@ class SimplifiedAttributeBean {
         attributeBean.setDescription(description)
         if (!statusNames.empty) {
             assert schemaId != null : "When creating a status attribute with statusNames an objectId must be supplied"
-            ArrayList<String>statusIds = configureFacade.findAllStatusTypeBeans(schemaId).findAll {statusNames.contains(it.name)}
-            attributeBean.setAdditionalValue(statusIds.join(","))
+            ArrayList<String>statusIds = configureFacade.findAllStatusTypeBeans(schemaId).findAll {statusNames.contains(it.name)}.id.collect {it.toString()}
+            assert statusIds.size() == statusNames.size() : "Error finding statuses for new status attributes, only found IDs:" + statusIds.join(",")
+            attributeBean.setTypeValue(statusIds.join(","))
+
         }
 
         return attributeBean
