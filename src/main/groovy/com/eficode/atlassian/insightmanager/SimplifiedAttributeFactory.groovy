@@ -1,4 +1,3 @@
-
 package com.eficode.atlassian.insightmanager
 
 import com.atlassian.jira.component.ComponentAccessor
@@ -8,11 +7,19 @@ import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeAttributeBean
 import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ConfigureFacadeImpl
 import com.riadalabs.jira.plugins.insight.services.model.ReferenceTypeBean
 
-class SimplifiedAttributeBean {
+
+/**
+ * A class intended to make creating new Attributes easier.<p>
+ * It has has static methods for creating attributes with the most common settings.<p>
+ * Additional configurations can be added to the Bean returned, configurations such as:<p>
+ *  1. bean.setMaximumCardinality()<p>
+ *  2. bean.setMinimumCardinality()<p>
+ *  3. bean.setIndexed()<p>
+ */
+class SimplifiedAttributeFactory {
 
     static Class configureFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ConfigureFacade")
     static ConfigureFacadeImpl configureFacade = ComponentAccessor.getOSGiComponentInstanceOfType(configureFacadeClass) as ConfigureFacadeImpl
-
 
 
     /**
@@ -24,7 +31,7 @@ class SimplifiedAttributeBean {
     static MutableObjectTypeAttributeBean getInteger(String name, String description = "") {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.DEFAULT, DefaultType.INTEGER)
         attributeBean.setDescription(description)
-        return  attributeBean
+        return attributeBean
     }
 
     /**
@@ -36,7 +43,7 @@ class SimplifiedAttributeBean {
     static MutableObjectTypeAttributeBean getBoolean(String name, String description = "") {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.DEFAULT, DefaultType.BOOLEAN)
         attributeBean.setDescription(description)
-        return  attributeBean
+        return attributeBean
     }
 
     /**
@@ -48,7 +55,7 @@ class SimplifiedAttributeBean {
     static MutableObjectTypeAttributeBean getDouble(String name, String description = "") {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.DEFAULT, DefaultType.DOUBLE)
         attributeBean.setDescription(description)
-        return  attributeBean
+        return attributeBean
     }
 
     /**
@@ -60,7 +67,7 @@ class SimplifiedAttributeBean {
     static MutableObjectTypeAttributeBean getDate(String name, String description = "") {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.DEFAULT, DefaultType.DATE)
         attributeBean.setDescription(description)
-        return  attributeBean
+        return attributeBean
     }
 
     /**
@@ -72,7 +79,7 @@ class SimplifiedAttributeBean {
     static MutableObjectTypeAttributeBean getTime(String name, String description = "") {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.DEFAULT, DefaultType.TIME)
         attributeBean.setDescription(description)
-        return  attributeBean
+        return attributeBean
     }
 
     /**
@@ -84,7 +91,7 @@ class SimplifiedAttributeBean {
     static MutableObjectTypeAttributeBean getDate_time(String name, String description = "") {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.DEFAULT, DefaultType.DATE_TIME)
         attributeBean.setDescription(description)
-        return  attributeBean
+        return attributeBean
     }
 
     /**
@@ -96,7 +103,7 @@ class SimplifiedAttributeBean {
     static MutableObjectTypeAttributeBean getEmail(String name, String description = "") {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.DEFAULT, DefaultType.EMAIL)
         attributeBean.setDescription(description)
-        return  attributeBean
+        return attributeBean
     }
 
     /**
@@ -108,7 +115,7 @@ class SimplifiedAttributeBean {
     static MutableObjectTypeAttributeBean getTextarea(String name, String description = "") {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.DEFAULT, DefaultType.TEXTAREA)
         attributeBean.setDescription(description)
-        return  attributeBean
+        return attributeBean
     }
 
     /**
@@ -120,7 +127,7 @@ class SimplifiedAttributeBean {
     static MutableObjectTypeAttributeBean getIpaddress(String name, String description = "") {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.DEFAULT, DefaultType.IPADDRESS)
         attributeBean.setDescription(description)
-        return  attributeBean
+        return attributeBean
     }
 
     /**
@@ -129,39 +136,40 @@ class SimplifiedAttributeBean {
      * @param description Description of attribute
      * @param isLabel set to true if this should be the label of the objectType
      * @return
-     */    static MutableObjectTypeAttributeBean getText(String name, String description = "",  boolean isLabel = false) {
+     */
+    static MutableObjectTypeAttributeBean getText(String name, String description = "", boolean isLabel = false) {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.DEFAULT, DefaultType.TEXT)
         attributeBean.setDescription(description)
         attributeBean.setLabel(isLabel)
         if (isLabel) {
             attributeBean.setIndexed(true)
         }
-        return  attributeBean
+        return attributeBean
     }
 
-    static MutableObjectTypeAttributeBean getSelect(String name, String description = "",  ArrayList<String> options = []) {
+    static MutableObjectTypeAttributeBean getSelect(String name, String description = "", ArrayList<String> options = []) {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.DEFAULT, DefaultType.SELECT)
         attributeBean.setDescription(description)
         if (options.size()) {
             attributeBean.setOptions(options.join(","))
         }
-        return  attributeBean
+        return attributeBean
     }
 
     static MutableObjectTypeAttributeBean getUrl(String name, String description = "", boolean enablePing = false) {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.DEFAULT, DefaultType.URL)
         attributeBean.setDescription(description)
         attributeBean.setAdditionalValue(enablePing ? "ENABLED" : "DISABLED")
-        return  attributeBean
+        return attributeBean
     }
 
 
-    static MutableObjectTypeAttributeBean getUser(String name, String description = "",  ArrayList<String>groupNames = [], boolean showOnProfile = true) {
+    static MutableObjectTypeAttributeBean getUser(String name, String description = "", ArrayList<String> groupNames = [], boolean showOnProfile = true) {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.USER, DefaultType.NONE)
         attributeBean.setDescription(description)
         groupNames ? attributeBean.setTypeValue(groupNames.join(",")) : null
         attributeBean.setAdditionalValue(showOnProfile ? "SHOW_PROFILE" : "HIDE_PROFILE")
-        return  attributeBean
+        return attributeBean
     }
 
 
@@ -174,14 +182,14 @@ class SimplifiedAttributeBean {
      * @param description Attribute description
      * @return
      */
-    static MutableObjectTypeAttributeBean getReferencedObject(String name, int schemaId, int refObjectTypeId, String refName,  String description = "") {
+    static MutableObjectTypeAttributeBean getReferencedObject(String name, int schemaId, int refObjectTypeId, String refName, String description = "") {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.REFERENCED_OBJECT, DefaultType.NONE)
         attributeBean.setDescription(description)
         attributeBean.setReferenceObjectTypeId(refObjectTypeId)
-        ReferenceTypeBean refBean = configureFacade.findAllReferenceTypeBeans(schemaId).find {it.name == refName}
+        ReferenceTypeBean refBean = configureFacade.findAllReferenceTypeBeans(schemaId).find { it.name == refName }
         attributeBean.setReferenceTypeBean(refBean)
         attributeBean.setIndexed(true)
-        return  attributeBean
+        return attributeBean
     }
 
 
@@ -189,7 +197,7 @@ class SimplifiedAttributeBean {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.GROUP, DefaultType.NONE)
         attributeBean.setDescription(description)
         attributeBean.setAdditionalValue(showOnProfile ? "SHOW_PROFILE" : "HIDE_PROFILE")
-        return  attributeBean
+        return attributeBean
     }
 
 
@@ -201,20 +209,19 @@ class SimplifiedAttributeBean {
      * @param description Attribute description
      * @return a new MutableObjectTypeAttributeBean
      */
-    static MutableObjectTypeAttributeBean getStatus(String name,Integer schemaId = null, ArrayList<String> statusNames = [], String description = "") {
+    static MutableObjectTypeAttributeBean getStatus(String name, Integer schemaId = null, ArrayList<String> statusNames = [], String description = "") {
         MutableObjectTypeAttributeBean attributeBean = new MutableObjectTypeAttributeBean(name, Type.STATUS, DefaultType.NONE)
         attributeBean.setDescription(description)
         if (!statusNames.empty) {
-            assert schemaId != null : "When creating a status attribute with statusNames an objectId must be supplied"
-            ArrayList<String>statusIds = configureFacade.findAllStatusTypeBeans(schemaId).findAll {statusNames.contains(it.name)}.id.collect {it.toString()}
-            assert statusIds.size() == statusNames.size() : "Error finding statuses for new status attributes, only found IDs:" + statusIds.join(",")
+            assert schemaId != null: "When creating a status attribute with statusNames an objectId must be supplied"
+            ArrayList<String> statusIds = configureFacade.findAllStatusTypeBeans(schemaId).findAll { statusNames.contains(it.name) }.id.collect { it.toString() }
+            assert statusIds.size() == statusNames.size(): "Error finding statuses for new status attributes, only found IDs:" + statusIds.join(",")
             attributeBean.setTypeValue(statusIds.join(","))
 
         }
 
         return attributeBean
     }
-
 
 
 }

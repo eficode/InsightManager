@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="run_ImObjectCrudSpec" type="GroovyScriptRunConfiguration" factoryName="Groovy">
+    <module name="insightmanagertest" />
+    <setting name="path" value="file://$PROJECT_DIR$/IM TestModule/tests/com/eficode/atlassian/insightmanager/tests/runners/run_ImObjectCrudSpec.groovy" />
+    <setting name="vmparams" value="" />
+    <setting name="params" value="" />
+    <setting name="workDir" value="file://$PROJECT_DIR$/IM TestModule/" />
+    <setting name="debug" value="false" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

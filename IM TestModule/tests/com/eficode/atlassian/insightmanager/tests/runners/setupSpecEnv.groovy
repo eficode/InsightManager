@@ -31,8 +31,8 @@ Logger log = LoggerFactory.getLogger("spec.env.setup")
 JsmH2Deployment jsmDep = new JsmH2Deployment(jiraBaseUrl, dockerHost, dockerCertPath)
 jsmDep.jsmContainer.containerImageTag = "latest"
 jsmDep.setJiraLicense(new File(jiraLicensePath).text)
-JiraInstanceManagerRest jiraR = new JiraInstanceManagerRest()
-jiraR.baseUrl = jiraBaseUrl
+JiraInstanceManagerRest jiraR = new JiraInstanceManagerRest(jiraBaseUrl)
+
 
 
 
@@ -53,10 +53,10 @@ if (useLocalMarketplace) {
 
 
 
-//jsmDep.removeDeployment()
-//assert jsmDep.setupDeployment()
+jsmDep.removeDeployment()
+assert jsmDep.setupDeployment()
 //jsmDep.jsmContainer.runBashCommandInContainer("echo 127.0.0.1 $jiraDomain >> /etc/hosts")
-//jsmDep.installApps()
+jsmDep.installApps()
 
 
 Map filesToUpdate = [

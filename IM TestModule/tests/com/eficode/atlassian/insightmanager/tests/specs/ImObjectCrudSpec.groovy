@@ -22,7 +22,7 @@ class ImObjectCrudSpec extends Specification {
     @Shared
     Logger log = Logger.getLogger(ImObjectCrudSpec)
     @Shared
-    String jiraBaseUrl = "http://jira.test.com:8080"
+    String jiraBaseUrl = "http://jira.localhost:8080"
     @Shared
     String restAdmin = "admin"
     @Shared

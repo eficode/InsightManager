@@ -24,6 +24,8 @@ jiraR.installGrapeDependency("com.konghq", "unirest-java", "3.13.6", "", "standa
 //jiraR.clearCodeCaches()
 //LazyMap spockResult = jiraR.runSpockTest("com.eficode.atlassian.insightmanager.tests.specs", "PocSpec")
 
-LazyMap spockResult = jiraR.runSpockTest("com.eficode.atlassian.insightmanager.tests.specs", "ImObjectSchemaCrudSpec","Test Creation of ObjectTypes with attributes" )
+//LazyMap spockResult = jiraR.runSpockTest("com.eficode.atlassian.insightmanager.tests.specs", "ImObjectSchemaCrudSpec","Test Creation of ObjectTypes with attributes" )
+//LazyMap spockResult = jiraR.runSpockTest("com.eficode.atlassian.insightmanager.tests.specs", "ImObjectSchemaCrudSpec","Verify cardinality and overwrites is respected" )
+LazyMap spockResult = jiraR.runSpockTest("com.eficode.atlassian.insightmanager.tests.specs", "ImObjectSchemaCrudSpec")
 
 log.info(spockResult.isEmpty()  ?  "" : spockResult.toString() )

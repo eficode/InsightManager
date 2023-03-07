@@ -93,13 +93,26 @@ class InsightManagerForScriptRunnerSpecsV2 extends Specification {
     Logger log = Logger.getLogger(this.class)
 
     @Shared
-    JsmH2Deployment jsmDeployment = new JsmH2Deployment("http://jira.domain.se:8080")
+    JsmH2Deployment jsmDeployment
 
     @Shared
-    String dockerEngineUrl = "https://docker.domain.se:2376"
+    String jiraBaseUrl = "http://jira.localhost:8080"
 
     @Shared
-    String dockerCertDirPath = "testResources/docker/dockerCert"
+    String jsmVersion = "latest"
+
+    @Shared
+    String jsmLicense = new File("~/.licenses/jira/jsm.license").text
+
+    @Shared
+    String srLicense = new File("~/.licenses/jira/sr.license").text
+
+    @Shared
+    //String dockerEngineUrl = "https://docker.domain.se:2376"
+    String dockerEngineUrl = ""
+
+    @Shared
+    String dockerCertDirPath = ""
 
     @Shared
     ObjectSchemaBean testSchema
@@ -107,9 +120,38 @@ class InsightManagerForScriptRunnerSpecsV2 extends Specification {
     def setupSpec() {
 
         log.setLevel(Level.ALL)
+        assert setupJsm()
 
 
     }
+
+    /**
+     * Removes jsm if it already exists and sets up a new container
+     * @return true on success
+     */
+    boolean setupJsm() {
+
+        log.info("Setting up new JSM container")
+        jsmDeployment = new JsmH2Deployment(jiraBaseUrl, dockerEngineUrl, dockerCertDirPath)
+        jsmDeployment.stopAndRemoveDeployment()
+
+        jsmDeployment.setJiraLicense(jsmLicense)
+        jsmDeployment.appsToInstall = ["https://marketplace.atlassian.com/download/apps/6820/version/1005740":srLicense]
+        jsmDeployment.setupDeployment()
+        log.info("\tCreated container:" + jsmDeployment.jsmContainer.id)
+
+        return jsmDeployment.startDeployment()
+
+    }
+
+    def "Test Basic Schema Crud"() {
+
+        
+
+    }
+
+
+
 
 
 
