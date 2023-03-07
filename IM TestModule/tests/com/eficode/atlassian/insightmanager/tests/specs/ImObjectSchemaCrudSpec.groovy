@@ -72,7 +72,6 @@ class ImObjectSchemaCrudSpec extends Specification {
     }
 
     def "Test Creation of ObjectTypes with attributes"() {
-        //TODO The select values are not set
         setup:
         log.info("Testing creation of schemas")
         String schemaName = "Testing ObjectTypeCreation"
@@ -112,6 +111,7 @@ class ImObjectSchemaCrudSpec extends Specification {
         then: "Perform a light check, verifying all types where created, looking closer at some of the complex types"
         assert im.objectTypeAttributeFacade.loadObjectTypeAttribute(objectTypeWithAllAtr.id, "A Status Attribute with 3 parameters").multiTypeValues == im.configureFacade.findAllStatusTypeBeans(schemaBean.id).findAll { it.name in ["Active", "Closed"] }.collect { it.id.toString() }: "Available statuses wasn't set properly"
         assert im.objectTypeAttributeFacade.loadObjectTypeAttribute(objectTypeWithAllAtr.id, "A Status Attribute with 4 parameters").multiTypeValues == im.configureFacade.findAllStatusTypeBeans(schemaBean.id).findAll { it.name in ["Active", "Closed"] }.collect { it.id.toString() }: "Available statuses wasn't set properly"
+        assert im.objectTypeAttributeFacade.loadObjectTypeAttribute(objectTypeWithAllAtr.id, "A Select Attribute with 3 parameters").options == "First Element,Second Element": "Available options wasn't set properly"
         assert im.objectTypeAttributeFacade.loadObjectTypeAttribute(objectTypeWithAllAtr.id, "A ReferencedObject Attribute with 4 parameters").referenceObjectTypeId == objectTypeWithNoAtr.id: "Referenced attribute type is not referencing the expected objectType"
         assert im.objectTypeAttributeFacade.loadObjectTypeAttribute(objectTypeWithAllAtr.id, "A ReferencedObject Attribute with 4 parameters").referenceTypeBean.name == "Link": "Referenced attribute type is not using the expected reference typ"
         AttributeDefaultType.values().every { defaultType ->
@@ -127,10 +127,11 @@ class ImObjectSchemaCrudSpec extends Specification {
 
         }
 
+
     }
 
 
-    def "Verify cardinality and overwrites is respected"() {
+    def "Verify default cardinality and overwrites is respected"() {
 
         setup:
         log.info("Verifying Cardinality is respected")
