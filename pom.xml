@@ -6,7 +6,7 @@
 
     <groupId>com.eficode.atlassian</groupId>
     <artifactId>insightmanager</artifactId>
-    <version>2.0.4-SNAPSHOT</version>
+    <version>2.0.6-SNAPSHOT</version>
 
     <organization>
         <name>Eficode</name>
@@ -25,11 +25,11 @@
 
     <properties>
         <!-- Set your JIRA version here -->
-        <jira.version>8.22.0</jira.version>
+        <jira.version>9.6.0</jira.version>
         <!-- Get Insight Version from: https://packages.atlassian.com/mvn/maven-atlassian-external/com/riadalabs/jira/plugins/insight/ -->
         <insight.version>9.0.7</insight.version>
         <!-- Get Insight Core Version from: https://packages.atlassian.com/mvn/maven-atlassian-external/com/riadalabs/insight-core-model/ -->
-        <insight.core.version>0.3.9</insight.core.version>
+        <insight.version>10.6.0</insight.version>
         <!-- Set logging levels for development here -->
         <logging.levels>com.example;DEBUG,com.onresolve;DEBUG</logging.levels>
 
@@ -50,19 +50,36 @@
             <version>6.55.1</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
-            <groupId>com.riadalabs.jira.plugins</groupId>
+            <groupId>com.atlassian.jira.plugins</groupId>
             <artifactId>insight</artifactId>
             <version>${insight.version}</version>
             <scope>provided</scope>
-
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-all</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.ehcache</groupId>
+                    <artifactId>ehcache</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.riadalabs</groupId>
+            <groupId>com.atlassian.servicedesk</groupId>
             <artifactId>insight-core-model</artifactId>
-            <version>${insight.core.version}</version>
+            <version>${insight.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.eficode.atlassian</groupId>
+            <artifactId>jirainstancemanager</artifactId>
+            <version>1.3.3-SNAPSHOT-groovy-3.0.11</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>com.atlassian.jira</groupId>
@@ -177,6 +194,10 @@
 
     <repositories>
 
+        <repository>
+            <id>eficode-github-jiraManagerRest</id>
+            <url>https://github.com/eficode/JiraInstanceMangerRest/raw/packages/repository/</url>
+        </repository>
         <!-- This is required to find the parent pom and ScriptRunner dependencies -->
         <repository>
             <id>adaptavist-external</id>
