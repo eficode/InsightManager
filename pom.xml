@@ -29,7 +29,7 @@
         <!-- Get Insight Version from: https://packages.atlassian.com/mvn/maven-atlassian-external/com/riadalabs/jira/plugins/insight/ -->
         <insight.version>9.0.7</insight.version>
         <!-- Get Insight Core Version from: https://packages.atlassian.com/mvn/maven-atlassian-external/com/riadalabs/insight-core-model/ -->
-        <insight.version>10.6.0</insight.version>
+        <insight.version>10.7.1</insight.version>
         <!-- Set logging levels for development here -->
         <logging.levels>com.example;DEBUG,com.onresolve;DEBUG</logging.levels>
 
@@ -47,7 +47,7 @@
         <dependency>
             <groupId>com.onresolve.jira.groovy</groupId>
             <artifactId>groovyrunner</artifactId>
-            <version>6.55.1</version>
+            <version>7.13.0</version>
             <scope>provided</scope>
         </dependency>
 
