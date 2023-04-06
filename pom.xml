@@ -95,11 +95,12 @@
                     <groupId>jta</groupId>
                     <artifactId>jta</artifactId>
                 </exclusion>
+
             </exclusions>
         </dependency>
 
 
-        <dependency>
+        <!--dependency>
             <groupId>com.atlassian.jira</groupId>
             <artifactId>jira-core</artifactId>
             <version>${jira.version}</version>
@@ -125,15 +126,23 @@
                     <groupId>org.twdata.pkgscanner</groupId>
                     <artifactId>package-scanner</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.atlassian.renderer</groupId>
+                    <artifactId>atlassian-renderer</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.sf.ehcache</groupId>
+                    <artifactId>ehcache</artifactId>
+                </exclusion>
             </exclusions>
-        </dependency>
+        </dependency-->
 
-        <dependency>
+        <!--dependency>
             <groupId>com.atlassian.jira.plugins</groupId>
             <artifactId>jira-greenhopper-plugin</artifactId>
             <version>7.7.0-DAILY20171221023017</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency-->
     </dependencies>
 
     <build>
