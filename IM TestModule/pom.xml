@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.eficode.atlassian</groupId>
             <artifactId>jirainstancemanager</artifactId>
-            <version>1.3.3-SNAPSHOT-groovy-3.0.11</version>
+            <version>1.4.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
