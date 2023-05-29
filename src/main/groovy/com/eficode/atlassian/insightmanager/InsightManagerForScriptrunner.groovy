@@ -1562,6 +1562,21 @@ class InsightManagerForScriptrunner {
     }
 
     /**
+     * Make an ObjectType abstract
+     * @param objectType The object type to modify
+     * @return An updated ObjectTypeBean representation
+     */
+    ObjectTypeBean setObjectTypeAbstract(ObjectTypeBean objectType) {
+
+        MutableObjectTypeBean mutableObjectTypeBean = objectType.createMutable()
+
+        mutableObjectTypeBean.setAbstractObjectType(true)
+
+        return objectTypeFacade.updateObjectTypeBean(mutableObjectTypeBean)
+
+    }
+
+    /**
      * Get object schema based on key
      * @param schemaKey Key of the object schema
      * @return The corresponding ObjectSchemaBean or null if not found
