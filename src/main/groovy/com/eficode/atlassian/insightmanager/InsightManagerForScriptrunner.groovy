@@ -36,6 +36,7 @@ import com.riadalabs.jira.plugins.insight.services.model.ObjectSchemaBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectSchemaPropertyBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeAttributeBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeBean
+import com.riadalabs.jira.plugins.insight.services.model.StatusTypeBean
 import com.riadalabs.jira.plugins.insight.services.model.factory.ObjectAttributeBeanFactory
 import com.riadalabs.jira.plugins.insight.services.model.factory.ObjectAttributeBeanFactoryImpl
 import com.riadalabs.jira.plugins.insight.services.progress.model.Progress
@@ -44,6 +45,7 @@ import io.riada.insight.api.graphql.resolvers.objectschema.ObjectSchema
 import org.apache.log4j.Logger
 import org.joda.time.DateTime
 
+import java.lang.reflect.Field
 import java.nio.file.FileSystemException
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -1521,6 +1523,40 @@ class InsightManagerForScriptrunner {
         return null
     }
 
+
+    /**
+     * Create a new Status option in schema
+     * @param optionName Name of the new status
+     * @param schemaId ID of schema where the new status should be created
+     * @param category Inactive (Red), Active (Green), Pending (Yellow)
+     * @param description (Optional) description of the new status
+     * @return StatusTypeBean representing the new status
+     */
+    StatusTypeBean createStatusOption(String optionName, Integer schemaId, String category, String description = "") {
+
+
+        log.info("Creating new Status option: " + optionName + ", with category: " + category + ", and description: " + description ?: "(None)")
+
+        ArrayList<Field> statusCategoryFields = StatusTypeBean.getFields().findAll {it.type == int && it.name.startsWith("STATUS_CATEGORY_")}
+        Map<String,Integer> categoryIdMap = statusCategoryFields.collectEntries {[it.name.replace("STATUS_CATEGORY_", ""), it.get(StatusTypeBean)]}
+
+        Integer categoryId = categoryIdMap.getOrDefault(category.toUpperCase(), -1)
+        log.debug("\tDetermined category id to be:" + categoryId)
+        assert categoryId != -1 : "Could not find Status Category $category, accepted categories are:" + categoryIdMap?.keySet()?.join(", ")
+
+        StatusTypeBean statusTypeBean = new StatusTypeBean(categoryId, optionName, schemaId )
+
+        if (description) {
+            statusTypeBean.setDescription(description)
+        }
+
+        StatusTypeBean newStatusTypeBean =  configureFacade.createStatusTypeBean(statusTypeBean)
+
+        log.info("\tCreated Status option:" + newStatusTypeBean.id)
+
+        return newStatusTypeBean
+
+    }
 
     /**
      * Create a new objectType
