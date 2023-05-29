@@ -36,6 +36,7 @@ import com.riadalabs.jira.plugins.insight.services.model.ObjectSchemaBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectSchemaPropertyBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeAttributeBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeBean
+import com.riadalabs.jira.plugins.insight.services.model.ReferenceTypeBean
 import com.riadalabs.jira.plugins.insight.services.model.StatusTypeBean
 import com.riadalabs.jira.plugins.insight.services.model.factory.ObjectAttributeBeanFactory
 import com.riadalabs.jira.plugins.insight.services.model.factory.ObjectAttributeBeanFactoryImpl
@@ -1510,14 +1511,14 @@ class InsightManagerForScriptrunner {
 
         ArrayList<IconBean> iconBeans = configureFacade.findAllIconBeans(schemaId).findAll {it.name == iconName}
         log.debug("\tFound ${iconBeans.size()} matching iconBeans")
-        IconBean matchingBean = iconBeans.size() == 1 ? iconBeans.first()  : iconBeans.find {it.objectSchemaId == schemaId}
+        IconBean matchingBean = iconBeans.size() == 1 ? iconBeans.first()  : (iconBeans.find {it.objectSchemaId == schemaId} ?: iconBeans.first())
 
         if (iconBeans.size() == 1) {
             log.info("\tReturning bean ${matchingBean.name} (${matchingBean.id}) from schema: ${matchingBean.objectSchemaId}")
             return iconBeans.first()
         }else if (iconBeans.size() > 1) {
-            log.info("\tFound multiple matching icons, returning bean ${matchingBean.name} (${matchingBean.id}) from schema: ${matchingBean.objectSchemaId}")
-            return iconBeans.find {it.objectSchemaId == schemaId}
+            log.info("\tFound multiple matching icons (${iconBeans.name.join(", ")}), returning bean ${matchingBean.name} (${matchingBean.id}) from schema: ${matchingBean.objectSchemaId}")
+            return matchingBean
         }
         log.warn("\tCould not find iconBean with name $iconName")
         return null
@@ -1706,6 +1707,35 @@ class InsightManagerForScriptrunner {
             log.warn("\tFailed to delete object schema ${schemaBean.id}")
             return false
         }
+
+    }
+
+
+    /**
+     * Create a "Reference Type", used when an attribute references another Object.
+     * Displayed in the "Additional Value" column when editing an objectTypes attributes
+     * @param name Name of the new reference type
+     * @param schemaId Schema where the reference should be created
+     * @param hexColor A hex color code representation of the reference types color, ex, ff00ff (pink) 000000 (black) ff0000 (red)
+     * @param description Description of the new reference type
+     * @return A new ReferenceTypeBean
+     */
+    ReferenceTypeBean createReferenceType(String name, int schemaId, String hexColor, String description = ""){
+
+        log.info("Creating a new Reference type:" + name)
+
+        ReferenceTypeBean referenceTypeBean = new ReferenceTypeBean()
+        referenceTypeBean.with {
+            it.name = name
+            it.objectSchemaId = schemaId
+            it.color = hexColor
+            it.description = description
+        }
+        ReferenceTypeBean newReferenceTypeBean = configureFacade.createReferenceTypeBean(referenceTypeBean)
+
+        log.info("\tCreated reference type:" + newReferenceTypeBean.id)
+
+        return newReferenceTypeBean
 
     }
 
