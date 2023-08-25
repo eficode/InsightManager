@@ -1712,9 +1712,10 @@ class InsightManagerForScriptrunner {
 
     }
 
+    /** ---- ---- ObjectSchema & ObjectType Role CRUD ---- ---- **/
 
     /**
-     * Get all role actors configured on a Schema Level, this does not include objectType roles in that schema
+     * Get all RoleBeans configured on a Schema Level, this does not include objectType roles in that schema
      * @param schemaId
      * @return
      */
@@ -1781,8 +1782,44 @@ class InsightManagerForScriptrunner {
 
     }
 
+    /**
+     * Get all RoleBeans configured for an objectType
+     * @param objectTypeId
+     * @return
+     */
+    ArrayList<RoleBean> getObjectTypeRoleBeans(int objectTypeId) {
+        return configureFacade.findRoleBeansByObjectType(objectTypeId) as ArrayList<RoleBean>
+    }
+
+    ArrayList<RoleActorBean>getObjectTypeManagers(int objectTypeId) {
+        return getObjectTypeRoleBeans(objectTypeId).findAll {it.type == RoleType.OBJECT_TYPE_MANAGER }
+    }
+
+    ArrayList<RoleActorBean>getObjectTypeDevelopers(int objectTypeId) {
+        return getObjectTypeRoleBeans(objectTypeId).findAll {it.type == RoleType.OBJECT_TYPE_DEVELOPER }
+    }
+
+    ArrayList<RoleActorBean>getObjectTypeUsers(int objectTypeId) {
+        return getObjectTypeRoleBeans(objectTypeId).findAll {it.type == RoleType.OBJECT_TYPE_USER }
+    }
+
+    void addObjectTypeRoleActors(int objectTypeId, RoleType roleType, ArrayList<String> groupNames = [], ArrayList<String>userKeys = []) {
+        RoleBean roleBean =  getObjectTypeRoleBeans(objectTypeId).find {it.type == roleType}
+        Map<String, Set<String>> roleActorMap = roleBean.roleActorBeans.groupBy {it.type}.collectEntries {[it.key , it.value.typeParameter as Set]}
+
+        roleActorMap.containsKey("atlassian-group-role-actor") ? (roleActorMap."atlassian-group-role-actor" += groupNames) : (roleActorMap."atlassian-group-role-actor" = groupNames)
+        roleActorMap.containsKey("atlassian-user-role-actor") ? (roleActorMap."atlassian-user-role-actor" += userKeys) : (roleActorMap."atlassian-user-role-actor" = userKeys)
+
+        roleActorMap.each {it.value = it.value.toSet()}
+
+        if (readOnly) {
+            log.info("Currenlty in readOnly mode, or would be set the ${roleType.name()} actors for objectType $objectTypeId to:" + roleActorMap)
+        }else {
+            configureFacade.storeActorsForRoleBean(roleActorMap, roleBean.id)
+        }
 
 
+    }
 
     /**
      * Create a "Reference Type", used when an attribute references another Object.

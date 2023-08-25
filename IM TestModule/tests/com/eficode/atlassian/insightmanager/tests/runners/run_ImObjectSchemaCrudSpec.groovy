@@ -29,7 +29,8 @@ jiraR.installGrapeDependency("com.eficode.atlassian", "jirainstancemanager", "1.
 
 //SpockResult spockResult = jiraR.runSpockTest("com.eficode.atlassian.insightmanager.tests.specs", "ImObjectSchemaCrudSpec","Test Creation of ObjectTypes with attributes" )
 //SpockResult spockResult = jiraR.runSpockTest("com.eficode.atlassian.insightmanager.tests.specs", "ImObjectSchemaCrudSpec","Verify cardinality and overwrites is respected" )
-SpockResult spockResult = jiraR.runSpockTest("com.eficode.atlassian.insightmanager.tests.specs", "ImObjectSchemaCrudSpec","Test ObjectSchema Role CRUD" )
+//SpockResult spockResult = jiraR.runSpockTest("com.eficode.atlassian.insightmanager.tests.specs", "ImObjectSchemaCrudSpec","Test ObjectSchema Role CRUD" )
+SpockResult spockResult = jiraR.runSpockTest("com.eficode.atlassian.insightmanager.tests.specs", "ImObjectSchemaCrudSpec","Test ObjectType Role CRUD" )
 //SpockResult spockResult = jiraR.runSpockTest("com.eficode.atlassian.insightmanager.tests.specs", "ImObjectSchemaCrudSpec")
 
 log.info(spockResult.toString() )

@@ -79,7 +79,7 @@ class ImObjectSchemaCrudSpec extends Specification {
     def "Test ObjectSchema Role CRUD"() {
 
         setup:
-        log.info("Testing CRUD of ObjectSchema and ObjectType Role CRUD")
+        log.info("Testing CRUD of ObjectSchema Role CRUD")
         String schemaName = "Testing Roles"
         String schemaKey = "ROLE"
 
@@ -88,11 +88,6 @@ class ImObjectSchemaCrudSpec extends Specification {
         im.deleteObjectSchema(schemaName, schemaKey) ?: log.info("\tRemoved a pre-existing schema")
         ObjectSchemaBean schemaBean
         schemaBean = im.createObjectSchema(schemaName, schemaKey)
-        IconBean iconBean = im.getIconBean("Gear", schemaBean.id)
-        ObjectTypeBean objectTypeWithManager = im.createObjectType("ObjectType with Manager", schemaBean.id, iconBean, "This objectType has a manager")
-        log.info("Created ObjectType:" + objectTypeWithManager)
-        //schemaBean = im.getObjectSchema(schemaKey)
-
 
         ArrayList<ApplicationUser> spocUsers = SpecHelper.createSpocUsers(3)
         log.info("Created/Reusing ${spocUsers.size()} Spoc users")
@@ -102,6 +97,15 @@ class ImObjectSchemaCrudSpec extends Specification {
         when: "Checking the Schema Roles and RoleActors for a new schema"
         log.info("\tChecking the default Roles and RoleActors for the new schema")
         ArrayList<RoleBean> schemaRoleBeans = im.getObjectSchemaRoleBeans(schemaBean.id)
+        log.debug("\t\tThe new ObjectSchema has the following actors by default:")
+        schemaRoleBeans.each {
+
+            log.debug("\t"*3 + it.type + " has user actors:")
+            it.roleActorBeans.each {
+                log.info("\t" * 4 + it.typeParameter)
+            }
+
+        }
 
         then: "They should have the excepted defaults"
         assert schemaRoleBeans.size() == 3: "A new schema did not have the expected RoleBeans"
@@ -214,7 +218,156 @@ class ImObjectSchemaCrudSpec extends Specification {
         log.info("\tConfirmed that addSchemaRoleActors() left any pre-existing actors alone")
 
 
-        // im.addSchemaRoleActorGroups(schemaBean.id, RoleType.SCHEMA_USER, ["jira-servicedesk-users", "jira-administrators"])
+
+
+    }
+
+    def "Test ObjectType Role CRUD"() {
+
+        setup:
+        log.info("Testing CRUD of ObjectType Role CRUD")
+        String schemaName = "Testing Roles"
+        String schemaKey = "ROLE"
+
+        InsightManagerForScriptrunner im = new InsightManagerForScriptrunner()
+        im.log.setLevel(Level.ALL)
+        ObjectSchemaBean schemaBean
+        im.deleteObjectSchema(schemaName, schemaKey) ?: log.info("\tRemoved a pre-existing schema")
+        schemaBean = im.createObjectSchema(schemaName, schemaKey)
+        //schemaBean = im.getObjectSchema(schemaKey)
+
+
+
+        ArrayList<ApplicationUser> spocUsers = SpecHelper.createSpocUsers(3)
+        log.info("Created/Reusing ${spocUsers.size()} Spoc users")
+        spocUsers.each { log.info("\t" + it.toString()) }
+
+        IconBean iconBean = im.getIconBean("Gear", schemaBean.id)
+        ObjectTypeBean objectTypeBean = im.createObjectType("ObjectType with Roles", schemaBean.id, iconBean, "This objectType will have roles")
+        log.info("\tCreated ObjectType:" + objectTypeBean)
+
+        when: "Checking the ObjectType Roles and RoleActors for a new ObjectType"
+        log.info("\tChecking the default Roles and RoleActors for the new ObjectType")
+        ArrayList<RoleBean> objectTypeRoleBeans = im.getObjectTypeRoleBeans(objectTypeBean.id)
+
+        log.debug("\t\tThe new ObjectType has the following actors by default:")
+        objectTypeRoleBeans.each {
+
+            log.debug("\t"*3 + it.type + " has user actors:")
+            it.roleActorBeans.each {
+                log.info("\t" * 4 + it.typeParameter)
+            }
+
+        }
+        then: "They should have the excepted defaults"
+        assert objectTypeRoleBeans.size() == 3: "A new ObjectType did not have the expected RoleBeans"
+        assert objectTypeRoleBeans.roleActorBeans.flatten().size() == 0: "A new ObjectType did not have the expected RoleActors"
+        log.info("\t\tThe new ObjectType has the expected 3 roles and 0 explicit RoleActors")
+
+
+        when: "Adding two group to all roles"
+        log.info("Adding \"jira-servicedesk-users\" and \"jira-administrators\" to all roles")
+        RoleType.values().findAll { it.name().startsWith("OBJECT_TYPE_") }.each { roleType ->
+            log.info("\tUpdating $roleType")
+            im.addObjectTypeRoleActors(objectTypeBean.id, roleType, ["jira-servicedesk-users", "jira-administrators"], [])
+        }
+        objectTypeRoleBeans = im.getObjectTypeRoleBeans(objectTypeBean.id)
+        log.info("\tFinished adding groups to roles")
+
+
+        then: "Checking that the API returns two groups and no users per role"
+        log.info("Checking that the API returns two groups and no users per role")
+        objectTypeRoleBeans.each {
+
+            ArrayList<String> groupActors = it.roleActorBeans.findAll { it.type == "atlassian-group-role-actor" }.typeParameter
+            log.debug("\t" + it.type + " has group actors:")
+            groupActors.each {
+                log.info("\t" * 2 + it)
+            }
+            assert groupActors == ["jira-servicedesk-users", "jira-administrators"]: "The ${it.type} Role for objectType ${objectTypeBean} has unexpected group actors:" + groupActors.join(", ")
+            assert it.roleActorBeans.findAll { it.type == "atlassian-user-role-actor" }.size() == 0: "The ${it.type} Role for objectType ${objectTypeBean} has unexpected users actors"
+
+        }
+        log.info("\tThe API confirms the groups was added to the correct ObjectType and Roles")
+
+
+        when: "Adding Spoc users to all roles"
+        log.info("Adding users ${spocUsers.key.join(", ")} to all roles")
+        RoleType.values().findAll { it.name().startsWith("OBJECT_TYPE_") }.each { roleType ->
+            log.info("\tUpdating $roleType")
+            im.addObjectTypeRoleActors(schemaBean.id, roleType, [], spocUsers.key)
+        }
+        objectTypeRoleBeans = im.getObjectTypeRoleBeans(schemaBean.id)
+        log.info("\tFinished adding users to roles")
+
+        then:"Checking that the API returns two groups and ${spocUsers.size()} users per role"
+        log.info("Checking that the API returns two groups and ${spocUsers.size()} users per role")
+        objectTypeRoleBeans.each {
+
+            ArrayList<String> userActors = it.roleActorBeans.findAll { it.type == "atlassian-user-role-actor" }.typeParameter
+            log.debug("\t" + it.type + " has user actors:")
+            userActors.each {
+                log.info("\t" * 2 + it)
+            }
+            assert userActors.sort() == spocUsers.key.sort(): "The ${it.type} Role for objectType ${objectTypeBean} has unexpected user actors:" + userActors.join(", ")
+            assert it.roleActorBeans.findAll { it.type == "atlassian-group-role-actor" }.size() == 2: "The ${it.type} Role for objectType ${objectTypeBean} has unexpected group actors"
+
+        }
+        log.info("\tThe API confirms the users was added to the correct ObjectType and Roles and that existing group actors where unaffected by the change")
+
+
+        when: "Clearing all ObjectType role actors"
+        log.info("\tClearing all ObjectType role actors")
+        objectTypeRoleBeans.each {
+            log.debug("\t" * 2 + "Clearing " + it.type)
+            im.clearRoleActors(it.id)
+        }
+        objectTypeRoleBeans = im.getObjectTypeRoleBeans(objectTypeBean.id)
+
+
+        then: "The ObjectType should have no Role Actors"
+        assert objectTypeRoleBeans.roleActorBeans.flatten().size() == 0: "Error clearing all of the ObjectType Role Actors"
+        log.info("\t" * 2 + "ObjectType RoleActors where successfully cleared")
+
+        when: "Adding actors to a role that already has actors"
+
+        log.info("Testing adding actors to a role that already has actors")
+        objectTypeRoleBeans = im.getObjectTypeRoleBeans(objectTypeBean.id)
+        assert objectTypeRoleBeans.roleActorBeans.flatten().isEmpty()
+        log.debug("\tConfirmed all roles for objectType $objectTypeBean are cleared")
+        log.debug("\tSetting one user and one group to each role")
+        objectTypeRoleBeans.each { roleBean ->
+            im.setRoleActors(
+                    [
+                            "atlassian-user-role-actor" : [spocUsers.first().key],
+                            "atlassian-group-role-actor": ["jira-servicedesk-users"]
+                    ] as Map,
+                    roleBean.id
+            )
+        }
+        objectTypeRoleBeans = im.getObjectTypeRoleBeans(objectTypeBean.id)
+        objectTypeRoleBeans.each {roleBean ->
+            log.debug("\t"*2 + "${roleBean.type.name()} actors set to: " + roleBean.roleActorBeans.typeParameter.flatten().join(","))
+            assert roleBean.roleActorBeans.typeParameter.flatten().size() == 2 : roleBean.type.name() + " was not given the expected actors"
+        }
+        log.info("\tObjectType now has one group and one user per role, making sure adding new users/groups leaves the original actors")
+        RoleType.values().findAll {it.name().startsWith("OBJECT_TYPE_")}.each {obectTypeRole ->
+
+            log.debug("\t"*2 + "Adding jira-administrators and ${spocUsers.last().key} to ${obectTypeRole.name()}")
+            im.addObjectTypeRoleActors(objectTypeBean.id, obectTypeRole, ["jira-administrators"], [spocUsers.last().key])
+        }
+        objectTypeRoleBeans = im.getObjectTypeRoleBeans(objectTypeBean.id)
+
+        then: "The pre-existing actors should still have their roles"
+
+        objectTypeRoleBeans.each {roleBean ->
+            log.debug("\t"*2 + "${roleBean.type.name()} actors set to: " + roleBean.roleActorBeans.typeParameter.flatten().sort().join(","))
+            assert roleBean.roleActorBeans.typeParameter.flatten().sort() == ["jira-servicedesk-users","jira-administrators", spocUsers.first().key, spocUsers.last().key ].sort() : roleBean.type.name() + " was not given the expected actors"
+        }
+        log.info("\tConfirmed that addObjectTypeRoleActors() left any pre-existing actors alone")
+
+
+
 
     }
 
