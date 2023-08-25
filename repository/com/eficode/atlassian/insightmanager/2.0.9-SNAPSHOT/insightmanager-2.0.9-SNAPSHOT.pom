@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.eficode.atlassian</groupId>
+    <artifactId>insightmanager</artifactId>
+    <version>2.0.9-SNAPSHOT</version>
+
+    <organization>
+        <name>Eficode</name>
+        <url>https://www.eficode.com/</url>
+    </organization>
+
+    <name>InsightManager</name>
+
+    <!-- Get pom version from: https://nexus.adaptavist.com/#browse/browse:external:com%2Fadaptavist%2Fpom%2Fscriptrunner-jira-standard -->
+    <!--parent>
+        <groupId>com.adaptavist.pom</groupId>
+        <artifactId>scriptrunner-jira-standard</artifactId>
+        <version>31</version>
+        <relativePath/>
+    </parent-->
+
+    <properties>
+        <!-- Set your JIRA version here -->
+        <jira.version>9.6.0</jira.version>
+        <!-- Get Insight Version from: https://packages.atlassian.com/mvn/maven-atlassian-external/com/riadalabs/jira/plugins/insight/ -->
+        <insight.version>9.0.7</insight.version>
+        <!-- Get Insight Core Version from: https://packages.atlassian.com/mvn/maven-atlassian-external/com/riadalabs/insight-core-model/ -->
+        <insight.version>10.7.1</insight.version>
+        <!-- Set logging levels for development here -->
+        <logging.levels>com.example;DEBUG,com.onresolve;DEBUG</logging.levels>
+
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>[3.0,4.0)</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.onresolve.jira.groovy</groupId>
+            <artifactId>groovyrunner</artifactId>
+            <version>7.13.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.atlassian.jira.plugins</groupId>
+            <artifactId>insight</artifactId>
+            <version>${insight.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-all</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.ehcache</groupId>
+                    <artifactId>ehcache</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.atlassian.servicedesk</groupId>
+            <artifactId>insight-core-model</artifactId>
+            <version>${insight.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.eficode.atlassian</groupId>
+            <artifactId>jirainstancemanager</artifactId>
+            <version>1.5.2-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.atlassian.jira</groupId>
+            <artifactId>jira-api</artifactId>
+            <version>${jira.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>jndi</groupId>
+                    <artifactId>jndi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jta</groupId>
+                    <artifactId>jta</artifactId>
+                </exclusion>
+
+            </exclusions>
+        </dependency>
+
+
+        <!--dependency>
+            <groupId>com.atlassian.jira</groupId>
+            <artifactId>jira-core</artifactId>
+            <version>${jira.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>jndi</groupId>
+                    <artifactId>jndi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jta</groupId>
+                    <artifactId>jta</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.jcip</groupId>
+                    <artifactId>com.springsource.net.jcip.annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.twdata.pkgscanner</groupId>
+                    <artifactId>package-scanner</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.atlassian.renderer</groupId>
+                    <artifactId>atlassian-renderer</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.sf.ehcache</groupId>
+                    <artifactId>ehcache</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency-->
+
+        <!--dependency>
+            <groupId>com.atlassian.jira.plugins</groupId>
+            <artifactId>jira-greenhopper-plugin</artifactId>
+            <version>7.7.0-DAILY20171221023017</version>
+            <scope>provided</scope>
+        </dependency-->
+    </dependencies>
+
+    <build>
+        <!--sourceDirectory>${basedir}/src/main/groovy</sourceDirectory-->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                            <goal>test-jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>1.13.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>addSources</goal>
+                            <goal>addTestSources</goal>
+                            <goal>compile</goal>
+                            <goal>compileTests</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy</artifactId>
+                        <version>3.0.11</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                </dependencies>
+                <!--configuration>
+                    <sources>
+                        <source>
+                            <directory>${project.basedir}/src/</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </source>
+                    </sources>
+                </configuration-->
+
+            </plugin>
+        </plugins>
+    </build>
+
+
+    <repositories>
+
+        <repository>
+            <id>eficode-github-jiraManagerRest</id>
+            <url>https://github.com/eficode/JiraInstanceMangerRest/raw/packages/repository/</url>
+        </repository>
+        <!-- This is required to find the parent pom and ScriptRunner dependencies -->
+        <repository>
+            <id>adaptavist-external</id>
+            <url>https://nexus.adaptavist.com/content/repositories/external</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>fail</checksumPolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>atlassian-external</id>
+            <url>https://packages.atlassian.com/mvn/maven-atlassian-external/</url>
+        </repository>
+    </repositories>
+
+</project>
