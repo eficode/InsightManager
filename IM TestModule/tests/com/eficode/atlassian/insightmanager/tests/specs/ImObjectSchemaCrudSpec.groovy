@@ -1,5 +1,7 @@
 package com.eficode.atlassian.insightmanager.tests.specs
 
+import com.atlassian.jira.user.ApplicationUser
+
 /**
  * Intended to test CRUD of Objects/attributes
  * Much work remains
@@ -17,6 +19,8 @@ import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeAttributeBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectSchemaBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeAttributeBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeBean
+import com.riadalabs.jira.plugins.insight.services.model.RoleBean
+import com.riadalabs.jira.plugins.insight.services.model.RoleType
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import spock.lang.Shared
@@ -68,6 +72,149 @@ class ImObjectSchemaCrudSpec extends Specification {
             return "${bean.name}, Id:" + bean.id
         }
 
+
+    }
+
+
+    def "Test ObjectSchema Role CRUD"() {
+
+        setup:
+        log.info("Testing CRUD of ObjectSchema and ObjectType Role CRUD")
+        String schemaName = "Testing Roles"
+        String schemaKey = "ROLE"
+
+        InsightManagerForScriptrunner im = new InsightManagerForScriptrunner()
+        im.log.setLevel(Level.ALL)
+        im.deleteObjectSchema(schemaName, schemaKey) ?: log.info("\tRemoved a pre-existing schema")
+        ObjectSchemaBean schemaBean
+        schemaBean = im.createObjectSchema(schemaName, schemaKey)
+        IconBean iconBean = im.getIconBean("Gear", schemaBean.id)
+        ObjectTypeBean objectTypeWithManager = im.createObjectType("ObjectType with Manager", schemaBean.id, iconBean, "This objectType has a manager")
+        log.info("Created ObjectType:" + objectTypeWithManager)
+        //schemaBean = im.getObjectSchema(schemaKey)
+
+
+        ArrayList<ApplicationUser> spocUsers = SpecHelper.createSpocUsers(3)
+        log.info("Created/Reusing ${spocUsers.size()} Spoc users")
+        spocUsers.each { log.info("\t" + it.toString()) }
+
+
+        when: "Checking the Schema Roles and RoleActors for a new schema"
+        log.info("\tChecking the default Roles and RoleActors for the new schema")
+        ArrayList<RoleBean> schemaRoleBeans = im.getObjectSchemaRoleBeans(schemaBean.id)
+
+        then: "They should have the excepted defaults"
+        assert schemaRoleBeans.size() == 3: "A new schema did not have the expected RoleBeans"
+        assert schemaRoleBeans.roleActorBeans.flatten().size() == 6: "A new schema did not have the expected RoleActors"
+        log.info("\t\tThe new schema has the expected 3 roles and 6 RoleActors")
+
+        when: "Clearing all schema role actors"
+        log.info("\tClearing all schema role actors")
+        schemaRoleBeans.each {
+            log.debug("\t" * 2 + "Clearing " + it.type)
+            im.clearRoleActors(it.id)
+        }
+        schemaRoleBeans = im.getObjectSchemaRoleBeans(schemaBean.id)
+
+
+        then: "The schema should have no Role Actors"
+        assert schemaRoleBeans.roleActorBeans.flatten().size() == 0: "Error clearing all of the Schema Role Actors"
+        log.info("\t" * 2 + "Schema RoleActors where successfully cleared")
+
+
+        when: "Adding two group to all roles"
+        log.info("Adding \"jira-servicedesk-users\" and \"jira-administrators\" to all roles")
+        RoleType.values().findAll { it.name().startsWith("SCHEMA_") }.each { roleType ->
+            log.info("\tUpdating $roleType")
+            im.addSchemaRoleActors(schemaBean.id, roleType, ["jira-servicedesk-users", "jira-administrators"], [])
+        }
+        schemaRoleBeans = im.getObjectSchemaRoleBeans(schemaBean.id)
+        log.info("\tFinished adding groups to roles")
+
+
+        then: "Checking that the API returns two groups and no users per role"
+        log.info("Checking that the API returns two groups and no users per role")
+        schemaRoleBeans.each {
+
+            ArrayList<String> groupActors = it.roleActorBeans.findAll { it.type == "atlassian-group-role-actor" }.typeParameter
+            log.debug("\t" + it.type + " has group actors:")
+            groupActors.each {
+                log.info("\t" * 2 + it)
+            }
+            assert groupActors == ["jira-servicedesk-users", "jira-administrators"]: "The ${it.type} Role in schema ${schemaBean.objectSchemaKey} has unexpected group actors:" + groupActors.join(", ")
+            assert it.roleActorBeans.findAll { it.type == "atlassian-user-role-actor" }.size() == 0: "The ${it.type} Role in schema ${schemaBean.objectSchemaKey} has unexpected users actors"
+
+        }
+        log.info("\tThe API confirms the groups was added to the correct Schema and Roles")
+
+
+        when: "Adding Spoc users to all roles"
+        log.info("Adding users ${spocUsers.key.join(", ")} to all roles")
+        RoleType.values().findAll { it.name().startsWith("SCHEMA_") }.each { roleType ->
+            log.info("\tUpdating $roleType")
+            im.addSchemaRoleActors(schemaBean.id, roleType, [], spocUsers.key)
+        }
+        schemaRoleBeans = im.getObjectSchemaRoleBeans(schemaBean.id)
+        log.info("\tFinished adding users to roles")
+
+        then:
+        "Checking that the API returns two groups and ${spocUsers.size()} users per role"
+        log.info("Checking that the API returns two groups and ${spocUsers.size()} users per role")
+        schemaRoleBeans.each {
+
+            ArrayList<String> userActors = it.roleActorBeans.findAll { it.type == "atlassian-user-role-actor" }.typeParameter
+            log.debug("\t" + it.type + " has user actors:")
+            userActors.each {
+                log.info("\t" * 2 + it)
+            }
+            assert userActors.sort() == spocUsers.key.sort(): "The ${it.type} Role in schema ${schemaBean.objectSchemaKey} has unexpected user actors:" + userActors.join(", ")
+            assert it.roleActorBeans.findAll { it.type == "atlassian-group-role-actor" }.size() == 2: "The ${it.type} Role in schema ${schemaBean.objectSchemaKey} has unexpected group actors"
+
+        }
+        log.info("\tThe API confirms the users was added to the correct Schema and Roles and that existing group actors where unaffected by the change")
+
+
+        when: "Adding actors to a role that already has actors"
+
+        log.info("Testing adding actors to a role that already has actors")
+        schemaRoleBeans = im.getObjectSchemaRoleBeans(schemaBean.id)
+        schemaRoleBeans.each { im.clearRoleActors(it.id) }
+        schemaRoleBeans = im.getObjectSchemaRoleBeans(schemaBean.id)
+        assert schemaRoleBeans.roleActorBeans.flatten().isEmpty()
+        log.debug("\tCleared all roles in Schema $schemaKey")
+        log.debug("\tSetting one user and one group to each role")
+        schemaRoleBeans.each { roleBean ->
+            im.setRoleActors(
+                    [
+                            "atlassian-user-role-actor" : [spocUsers.first().key],
+                            "atlassian-group-role-actor": ["jira-servicedesk-users"]
+                    ] as Map,
+                    roleBean.id
+            )
+        }
+        schemaRoleBeans = im.getObjectSchemaRoleBeans(schemaBean.id)
+        schemaRoleBeans.each {roleBean ->
+            log.debug("\t"*2 + "${roleBean.type.name()} actors set to: " + roleBean.roleActorBeans.typeParameter.flatten().join(","))
+            assert roleBean.roleActorBeans.typeParameter.flatten().size() == 2 : roleBean.type.name() + " was not given the expected actors"
+        }
+        log.info("\tSchema now has one group and one user per role, making sure adding new users/groups leaves the original actors")
+        RoleType.values().findAll {it.name().startsWith("SCHEMA_")}.each {schemaRole ->
+
+            log.debug("\t"*2 + "Adding jira-administrators and ${spocUsers.last().key} to ${schemaRole.name()}")
+            im.addSchemaRoleActors(schemaBean.id, schemaRole, ["jira-administrators"], [spocUsers.last().key])
+        }
+        schemaRoleBeans = im.getObjectSchemaRoleBeans(schemaBean.id)
+
+        then: "The pre-existing actors should still have their roles"
+
+        schemaRoleBeans.each {roleBean ->
+            log.debug("\t"*2 + "${roleBean.type.name()} actors set to: " + roleBean.roleActorBeans.typeParameter.flatten().sort().join(","))
+            assert roleBean.roleActorBeans.typeParameter.flatten().sort() == ["jira-servicedesk-users","jira-administrators", spocUsers.first().key, spocUsers.last().key ].sort() : roleBean.type.name() + " was not given the expected actors"
+        }
+        log.info("\tConfirmed that addSchemaRoleActors() left any pre-existing actors alone")
+
+
+        // im.addSchemaRoleActorGroups(schemaBean.id, RoleType.SCHEMA_USER, ["jira-servicedesk-users", "jira-administrators"])
 
     }
 
@@ -200,14 +347,14 @@ class ImObjectSchemaCrudSpec extends Specification {
         initialValuesReturned[dateTimeAttributeBean.name] != updatedValuesReturned[dateTimeAttributeBean.name]
 
 
-        when:"Setting new values using arrays, individually per attribute"
+        when: "Setting new values using arrays, individually per attribute"
         sleep(1100)
         im.updateObjectAttribute(objectBean, statusAttributeBean.name, ["Active"])
         im.updateObjectAttribute(objectBean, dateAttributeBean.name, [new Date()])
         im.updateObjectAttribute(objectBean, dateTimeAttributeBean.name, [new Date()])
         Map<String, ArrayList> updatedValuesReturned2 = im.getObjectAttributeValues(objectBean)
 
-        then:"All attributes should be updated, and still only have one value"
+        then: "All attributes should be updated, and still only have one value"
         updatedValuesReturned2.each { it.value.size() == 1 }
         updatedValuesReturned[statusAttributeBean.name] != updatedValuesReturned2[statusAttributeBean.name]
         updatedValuesReturned[dateAttributeBean.name] != updatedValuesReturned2[dateAttributeBean.name]
@@ -226,18 +373,18 @@ class ImObjectSchemaCrudSpec extends Specification {
         updatedValuesReturned2[dateTimeAttributeBean.name] != updatedValuesReturned3[dateTimeAttributeBean.name]
 
         when: "Setting all the attributes at once, with multiple values per attribute"
-        im.updateObjectAttributes(objectBean, [(statusAttributeBean.name): ["Active","Closed"], (dateAttributeBean.name):[ new Date(), new Date(100)], (dateTimeAttributeBean.name): [new Date(), new Date(200)]])
+        im.updateObjectAttributes(objectBean, [(statusAttributeBean.name): ["Active", "Closed"], (dateAttributeBean.name): [new Date(), new Date(100)], (dateTimeAttributeBean.name): [new Date(), new Date(200)]])
 
-        then:  "All attributes should still only have one value"
+        then: "All attributes should still only have one value"
         im.getObjectAttributeValues(objectBean).each { it.value.size() == 1 }
 
-        when:"Setting new values using arrays with multiple values, individually per attribute"
+        when: "Setting new values using arrays with multiple values, individually per attribute"
         sleep(1100)
         im.updateObjectAttribute(objectBean, statusAttributeBean.name, ["Closed", "Active"])
-        im.updateObjectAttribute(objectBean, dateAttributeBean.name, [new Date(200),new Date()])
-        im.updateObjectAttribute(objectBean, dateTimeAttributeBean.name, [new Date(300),new Date()])
+        im.updateObjectAttribute(objectBean, dateAttributeBean.name, [new Date(200), new Date()])
+        im.updateObjectAttribute(objectBean, dateTimeAttributeBean.name, [new Date(300), new Date()])
 
-        then:  "All attributes should still only have one value"
+        then: "All attributes should still only have one value"
         im.getObjectAttributeValues(objectBean).each { it.value.size() == 1 }
 
     }

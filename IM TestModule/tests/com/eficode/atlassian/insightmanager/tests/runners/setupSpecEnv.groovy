@@ -19,7 +19,7 @@ String jiraLicensePath = userHome + "/.licenses/jira/jsm.license"
 String srLicensePath = userHome + "/.licenses/jira/sr.license"
 String dockerHost = ""
 String dockerCertPath = ""
-String JiraInstanceManagerRestSrcRoot = "../../JiraInstanceManagerRest/src" //If set, these source files will be used instead of the git repo using grape
+String JiraInstanceManagerRestSrcRoot = ""// "../../JiraInstanceManagerRest/src" //If set, these source files will be used instead of the git repo using grape
 
 
 //Setup a local nginx container that will host app binaries
@@ -29,7 +29,9 @@ NginxContainer nginxContainer = new NginxContainer()
 
 Logger log = LoggerFactory.getLogger("spec.env.setup")
 JsmH2Deployment jsmDep = new JsmH2Deployment(jiraBaseUrl, dockerHost, dockerCertPath)
+jsmDep.removeDeployment()
 jsmDep.jsmContainer.containerImageTag = "latest"
+jsmDep.jsmContainer.enableJvmDebug("5005")
 jsmDep.setJiraLicense(new File(jiraLicensePath).text)
 JiraInstanceManagerRest jiraR = new JiraInstanceManagerRest(jiraBaseUrl)
 
@@ -53,7 +55,7 @@ if (useLocalMarketplace) {
 
 
 
-jsmDep.removeDeployment()
+
 assert jsmDep.setupDeployment()
 //jsmDep.jsmContainer.runBashCommandInContainer("echo 127.0.0.1 $jiraDomain >> /etc/hosts")
 jsmDep.installApps()
@@ -72,7 +74,8 @@ if (JiraInstanceManagerRestSrcRoot) {
     filesToUpdate.put((JiraInstanceManagerRestSrcRoot + "/main/groovy/com/eficode/atlassian/jiraInstanceManager/") , "com/eficode/atlassian/jiraInstanceManager/")
     filesToUpdate.put((JiraInstanceManagerRestSrcRoot + "/main/groovy/com/eficode/atlassian/jiraInstanceManager/beans/") , "com/eficode/atlassian/jiraInstanceManager/beans/")
 }else {
-    jiraR.installGrapeDependency("com.eficode.atlassian", "jiraInstanceManager", "1.0.3-SNAPSHOT","https://github.com/eficode/JiraInstanceManagerRest/raw/packages/repository/" )
+    jiraR.installGrapeDependency("com.eficode.atlassian", "jirainstancemanager", "1.5.2-SNAPSHOT","https://github.com/eficode/JiraInstanceManagerRest/raw/packages/repository/" )
+    //jiraR.installGrapeDependency("com.eficode.atlassian", "jirainstancemanager", "1.5.2-SNAPSHOT", "https://github.com/eficode/JiraInstanceManagerRest/raw/packages/repository/", "standalone")
 }
 
 assert jiraR.installGrapeDependency("com.konghq", "unirest-java", "3.13.6", "", "standalone")
