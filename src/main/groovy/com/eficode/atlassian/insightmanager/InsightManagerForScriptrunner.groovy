@@ -37,12 +37,14 @@ import com.riadalabs.jira.plugins.insight.services.model.ObjectSchemaPropertyBea
 import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeAttributeBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeBean
 import com.riadalabs.jira.plugins.insight.services.model.ReferenceTypeBean
+import com.riadalabs.jira.plugins.insight.services.model.RoleActorBean
+import com.riadalabs.jira.plugins.insight.services.model.RoleBean
+import com.riadalabs.jira.plugins.insight.services.model.RoleType
 import com.riadalabs.jira.plugins.insight.services.model.StatusTypeBean
 import com.riadalabs.jira.plugins.insight.services.model.factory.ObjectAttributeBeanFactory
 import com.riadalabs.jira.plugins.insight.services.model.factory.ObjectAttributeBeanFactoryImpl
 import com.riadalabs.jira.plugins.insight.services.progress.model.Progress
 import com.riadalabs.jira.plugins.insight.services.progress.model.ProgressId
-import io.riada.insight.api.graphql.resolvers.objectschema.ObjectSchema
 import org.apache.log4j.Logger
 import org.joda.time.DateTime
 
@@ -1710,6 +1712,114 @@ class InsightManagerForScriptrunner {
 
     }
 
+    /** ---- ---- ObjectSchema & ObjectType Role CRUD ---- ---- **/
+
+    /**
+     * Get all RoleBeans configured on a Schema Level, this does not include objectType roles in that schema
+     * @param schemaId
+     * @return
+     */
+    ArrayList<RoleBean> getObjectSchemaRoleBeans(int schemaId) {
+
+        return configureFacade.findRoleBeansByObjectSchema(schemaId) as ArrayList<RoleBean>
+    }
+
+
+    ArrayList<RoleActorBean>getSchemaManagers(int schemaId) {
+        return getObjectSchemaRoleBeans(schemaId).findAll {it.type == RoleType.SCHEMA_MANAGER }
+    }
+
+    ArrayList<RoleActorBean>getSchemaDevelopers(int schemaId) {
+        return getObjectSchemaRoleBeans(schemaId).findAll {it.type == RoleType.SCHEMA_DEVELOPER }
+    }
+
+    ArrayList<RoleActorBean>getSchemaUsers(int schemaId) {
+        return getObjectSchemaRoleBeans(schemaId).findAll {it.type == RoleType.SCHEMA_USER }
+    }
+
+
+    /**
+     * A raw method for setting RoleActors
+     * @param typeAndActors A map where the key is a RoleBean type and the value is an array of group names or user keys
+     *  ex: [
+     *          "atlassian-user-role-actor" : [ "JIRAUSER10000", "JIRAUSER10002"],
+     *          "atlassian-group-role-actor": ["jira-servicedesk-users"]
+     *      ]
+     * @param roleBeanId for exampled retrieved from getObjectSchemaRoleBeans()
+     */
+    void setRoleActors(Map<String, Set<String>> typeAndActors, int roleBeanId) {
+
+        typeAndActors.each {it.value = it.value.toSet()}  //Make sure Set is used and not ArrayList/List
+
+        if (readOnly) {
+            log.info("Currenlty in readOnly mode, or would be set the actors of RoleBean ${roleBeanId} to:" + typeAndActors)
+        }else {
+            configureFacade.storeActorsForRoleBean(typeAndActors as Map<String, Set<String>>, roleBeanId)
+        }
+
+    }
+
+    void clearRoleActors(int roleBeanId) {
+        setRoleActors([:], roleBeanId)
+
+    }
+
+    void addSchemaRoleActors(int schemaId, RoleType roleType, ArrayList<String> groupNames = [], ArrayList<String>userKeys = []) {
+        RoleBean roleBean =  getObjectSchemaRoleBeans(schemaId).find {it.type == roleType}
+        Map<String, Set<String>> roleActorMap = roleBean.roleActorBeans.groupBy {it.type}.collectEntries {[it.key , it.value.typeParameter as Set]}
+
+        roleActorMap.containsKey("atlassian-group-role-actor") ? (roleActorMap."atlassian-group-role-actor" += groupNames) : (roleActorMap."atlassian-group-role-actor" = groupNames)
+        roleActorMap.containsKey("atlassian-user-role-actor") ? (roleActorMap."atlassian-user-role-actor" += userKeys) : (roleActorMap."atlassian-user-role-actor" = userKeys)
+
+        roleActorMap.each {it.value = it.value.toSet()}
+
+        if (readOnly) {
+            log.info("Currenlty in readOnly mode, or would be set the ${roleType.name()} actors in schema $schemaId to:" + roleActorMap)
+        }else {
+            configureFacade.storeActorsForRoleBean(roleActorMap, roleBean.id)
+        }
+
+
+    }
+
+    /**
+     * Get all RoleBeans configured for an objectType
+     * @param objectTypeId
+     * @return
+     */
+    ArrayList<RoleBean> getObjectTypeRoleBeans(int objectTypeId) {
+        return configureFacade.findRoleBeansByObjectType(objectTypeId) as ArrayList<RoleBean>
+    }
+
+    ArrayList<RoleActorBean>getObjectTypeManagers(int objectTypeId) {
+        return getObjectTypeRoleBeans(objectTypeId).findAll {it.type == RoleType.OBJECT_TYPE_MANAGER }
+    }
+
+    ArrayList<RoleActorBean>getObjectTypeDevelopers(int objectTypeId) {
+        return getObjectTypeRoleBeans(objectTypeId).findAll {it.type == RoleType.OBJECT_TYPE_DEVELOPER }
+    }
+
+    ArrayList<RoleActorBean>getObjectTypeUsers(int objectTypeId) {
+        return getObjectTypeRoleBeans(objectTypeId).findAll {it.type == RoleType.OBJECT_TYPE_USER }
+    }
+
+    void addObjectTypeRoleActors(int objectTypeId, RoleType roleType, ArrayList<String> groupNames = [], ArrayList<String>userKeys = []) {
+        RoleBean roleBean =  getObjectTypeRoleBeans(objectTypeId).find {it.type == roleType}
+        Map<String, Set<String>> roleActorMap = roleBean.roleActorBeans.groupBy {it.type}.collectEntries {[it.key , it.value.typeParameter as Set]}
+
+        roleActorMap.containsKey("atlassian-group-role-actor") ? (roleActorMap."atlassian-group-role-actor" += groupNames) : (roleActorMap."atlassian-group-role-actor" = groupNames)
+        roleActorMap.containsKey("atlassian-user-role-actor") ? (roleActorMap."atlassian-user-role-actor" += userKeys) : (roleActorMap."atlassian-user-role-actor" = userKeys)
+
+        roleActorMap.each {it.value = it.value.toSet()}
+
+        if (readOnly) {
+            log.info("Currenlty in readOnly mode, or would be set the ${roleType.name()} actors for objectType $objectTypeId to:" + roleActorMap)
+        }else {
+            configureFacade.storeActorsForRoleBean(roleActorMap, roleBean.id)
+        }
+
+
+    }
 
     /**
      * Create a "Reference Type", used when an attribute references another Object.
