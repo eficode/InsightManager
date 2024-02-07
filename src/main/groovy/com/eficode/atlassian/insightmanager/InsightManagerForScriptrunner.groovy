@@ -7,15 +7,24 @@ import com.atlassian.jira.security.JiraAuthenticationContext
 import com.atlassian.jira.user.ApplicationUser
 import com.atlassian.jira.web.ExecutingHttpRequest
 import com.onresolve.scriptrunner.runner.customisers.WithPlugin
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ConfigureFacadeImpl
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.IQLFacadeImpl
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ImportSourceConfigurationFacadeImpl
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectFacadeImpl
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectSchemaFacadeImpl
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectTicketFacadeImpl
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectTypeAttributeFacadeImpl
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectTypeFacadeImpl
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ProgressFacadeImpl
+//import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ConfigureFacadeImpl
+//import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.IQLFacadeImpl
+//import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ImportSourceConfigurationFacadeImpl
+//import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectFacadeImpl
+//import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectSchemaFacadeImpl
+//import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectTicketFacadeImpl
+//import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectTypeAttributeFacadeImpl
+//import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectTypeFacadeImpl
+//import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ProgressFacadeImpl
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.ConfigureFacade
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.IQLFacade
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.ImportSourceConfigurationFacade
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectFacade
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectSchemaFacade
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectTicketFacade
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectTypeAttributeFacade
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectTypeFacade
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.ProgressFacade
 import com.riadalabs.jira.plugins.insight.common.exception.InsightException
 import com.riadalabs.jira.plugins.insight.common.exception.RuntimeInsightException
 import com.riadalabs.jira.plugins.insight.services.events.EventDispatchOption
@@ -42,7 +51,7 @@ import com.riadalabs.jira.plugins.insight.services.model.RoleBean
 import com.riadalabs.jira.plugins.insight.services.model.RoleType
 import com.riadalabs.jira.plugins.insight.services.model.StatusTypeBean
 import com.riadalabs.jira.plugins.insight.services.model.factory.ObjectAttributeBeanFactory
-import com.riadalabs.jira.plugins.insight.services.model.factory.ObjectAttributeBeanFactoryImpl
+//import com.riadalabs.jira.plugins.insight.services.model.factory.ObjectAttributeBeanFactoryImpl
 import com.riadalabs.jira.plugins.insight.services.progress.model.Progress
 import com.riadalabs.jira.plugins.insight.services.progress.model.ProgressId
 import org.apache.log4j.Logger
@@ -70,30 +79,30 @@ import java.time.LocalDateTime
  *
  */
 
-@WithPlugin("com.riadalabs.jira.plugins.insight")
+//@WithPlugin("com.riadalabs.jira.plugins.insight")
 class InsightManagerForScriptrunner {
 
     Logger log
     Class objectSchemaFacadeClass
-    ObjectSchemaFacadeImpl objectSchemaFacade
+    ObjectSchemaFacade objectSchemaFacade
     Class objectFacadeClass
-    ObjectFacadeImpl objectFacade
+    ObjectFacade objectFacade
     Class iqlFacadeClass
-    IQLFacadeImpl iqlFacade
-    Class objectTypeFacadeClass
-    ObjectTypeFacadeImpl objectTypeFacade
+    IQLFacade iqlFacade
+    //Class IobjectTypeFacadeClass
+    ObjectTypeFacade objectTypeFacade
     Class objectTypeAttributeFacadeClass
-    ObjectTypeAttributeFacadeImpl objectTypeAttributeFacade
+    ObjectTypeAttributeFacade objectTypeAttributeFacade
     Class objectAttributeBeanFactoryClass
     ObjectAttributeBeanFactory objectAttributeBeanFactory
     Class ImportSourceConfigurationFacadeClass
-    ImportSourceConfigurationFacadeImpl importFacade
+    ImportSourceConfigurationFacade importFacade
     Class ProgressFacadeClass
-    ProgressFacadeImpl progressFacade
+    ProgressFacade progressFacade
     Class objectTicketFacadeClass
-    ObjectTicketFacadeImpl objectTicketFacade
+    ObjectTicketFacade objectTicketFacade
     Class configureFacadeClass
-    ConfigureFacadeImpl configureFacade
+    ConfigureFacade configureFacade
     public boolean readOnly
     boolean inJsdBehaviourContext //Set to true if currently executing as a Behaviour in JSD
     String baseUrl
@@ -113,7 +122,7 @@ class InsightManagerForScriptrunner {
         //The facade classes
         objectSchemaFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectSchemaFacade")
         objectFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectFacade")
-        objectTypeFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectTypeFacade")
+        //objectTypeFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectTypeFacade")
         objectTypeAttributeFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectTypeAttributeFacade")
         objectAttributeBeanFactoryClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.services.model.factory.ObjectAttributeBeanFactory")
         iqlFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.IQLFacade")
@@ -123,16 +132,16 @@ class InsightManagerForScriptrunner {
         configureFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ConfigureFacade")
 
         //The facade instances
-        objectSchemaFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectSchemaFacadeClass) as ObjectSchemaFacadeImpl
-        objectFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectFacadeClass) as ObjectFacadeImpl
-        objectTypeFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectTypeFacadeClass) as ObjectTypeFacadeImpl
-        objectTypeAttributeFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectTypeAttributeFacadeClass) as ObjectTypeAttributeFacadeImpl
-        objectAttributeBeanFactory = ComponentAccessor.getOSGiComponentInstanceOfType(objectAttributeBeanFactoryClass) as ObjectAttributeBeanFactoryImpl
-        iqlFacade = ComponentAccessor.getOSGiComponentInstanceOfType(iqlFacadeClass) as IQLFacadeImpl
-        importFacade = ComponentAccessor.getOSGiComponentInstanceOfType(ImportSourceConfigurationFacadeClass) as ImportSourceConfigurationFacadeImpl
-        progressFacade = ComponentAccessor.getOSGiComponentInstanceOfType(ProgressFacadeClass) as ProgressFacadeImpl
-        objectTicketFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectTicketFacadeClass) as ObjectTicketFacadeImpl
-        configureFacade = ComponentAccessor.getOSGiComponentInstanceOfType(configureFacadeClass) as ConfigureFacadeImpl
+        objectSchemaFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectSchemaFacadeClass)
+        objectFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectFacadeClass)
+        objectTypeFacade = ComponentAccessor.getOSGiComponentInstanceOfType(ObjectTypeFacade.class)
+        objectTypeAttributeFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectTypeAttributeFacadeClass)
+        objectAttributeBeanFactory = ComponentAccessor.getOSGiComponentInstanceOfType(objectAttributeBeanFactoryClass)
+        iqlFacade = ComponentAccessor.getOSGiComponentInstanceOfType(iqlFacadeClass)
+        importFacade = ComponentAccessor.getOSGiComponentInstanceOfType(ImportSourceConfigurationFacadeClass)
+        progressFacade = ComponentAccessor.getOSGiComponentInstanceOfType(ProgressFacadeClass)
+        objectTicketFacade = ComponentAccessor.getOSGiComponentInstanceOfType(objectTicketFacadeClass)
+        configureFacade = ComponentAccessor.getOSGiComponentInstanceOfType(configureFacadeClass)
 
         //Atlassian Managers
         authContext = ComponentAccessor.getJiraAuthenticationContext()
