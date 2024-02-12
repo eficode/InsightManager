@@ -22,10 +22,14 @@ import com.atlassian.jira.security.roles.ProjectRoleManager
 import com.atlassian.jira.user.ApplicationUser
 import com.atlassian.jira.user.util.UserManager
 import com.atlassian.jira.util.BaseUrl
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.IQLFacadeImpl
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.InsightPermissionFacadeImpl
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectSchemaFacadeImpl
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ProgressFacadeImpl
+// import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.IQLFacadeImpl
+// import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.InsightPermissionFacadeImpl
+// import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ObjectSchemaFacadeImpl
+// import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ProgressFacadeImpl
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.IQLFacade
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.InsightPermissionFacade
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.ObjectSchemaFacade
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.ProgressFacade
 import com.riadalabs.jira.plugins.insight.common.exception.InsightException
 import com.riadalabs.jira.plugins.insight.common.exception.PermissionInsightException
 import com.riadalabs.jira.plugins.insight.services.model.CommentBean
@@ -73,13 +77,13 @@ class InsightManagerForScriptRunnerSpecsV2 extends Specification {
     @Shared
     Class iqlFacadeClass
     @Shared
-    IQLFacadeImpl iqlFacade
+    IQLFacade iqlFacade
     @Shared
-    ObjectSchemaFacadeImpl objectSchemaFacade
+    ObjectSchemaFacade objectSchemaFacade
     @Shared
     Class objectSchemaFacadeClass
     @Shared
-    ProgressFacadeImpl progressFacade
+    ProgressFacade progressFacade
     @Shared
     Class progressFacadeClass
 

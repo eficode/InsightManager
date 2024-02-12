@@ -4,7 +4,8 @@ import com.atlassian.jira.component.ComponentAccessor
 import com.riadalabs.jira.plugins.insight.services.model.MutableObjectTypeAttributeBean
 import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeAttributeBean.Type as Type
 import com.riadalabs.jira.plugins.insight.services.model.ObjectTypeAttributeBean.DefaultType as DefaultType
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ConfigureFacadeImpl
+//import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ConfigureFacadeImpl
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.ConfigureFacade
 import com.riadalabs.jira.plugins.insight.services.model.ReferenceTypeBean
 
 
@@ -19,7 +20,7 @@ import com.riadalabs.jira.plugins.insight.services.model.ReferenceTypeBean
 class SimplifiedAttributeFactory {
 
     static Class configureFacadeClass = ComponentAccessor.getPluginAccessor().getClassLoader().findClass("com.riadalabs.jira.plugins.insight.channel.external.api.facade.ConfigureFacade")
-    static ConfigureFacadeImpl configureFacade = ComponentAccessor.getOSGiComponentInstanceOfType(configureFacadeClass) as ConfigureFacadeImpl
+    static ConfigureFacade configureFacade = ComponentAccessor.getOSGiComponentInstanceOfType(configureFacadeClass)
 
 
     /**

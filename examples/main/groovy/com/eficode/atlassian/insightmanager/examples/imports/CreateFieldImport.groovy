@@ -3,7 +3,8 @@ package com.eficode.atlassian.insightmanager.examples.imports
 import com.eficode.atlassian.insightmanager.InsightManagerForScriptrunner
 import com.eficode.atlassian.insightmanager.SimplifiedAttributeFactory
 import com.eficode.atlassian.jiraInstanceManager.JiraInstanceManagerRest
-import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ImportSourceConfigurationFacadeImpl
+//import com.riadalabs.jira.plugins.insight.channel.external.api.facade.impl.ImportSourceConfigurationFacadeImpl
+import com.riadalabs.jira.plugins.insight.channel.external.api.facade.ImportSourceConfigurationFacade
 import com.riadalabs.jira.plugins.insight.services.imports.common.external.DataLocator
 import com.riadalabs.jira.plugins.insight.services.imports.common.external.ModuleOTSelector
 import com.riadalabs.jira.plugins.insight.services.imports.common.external.model.EmptyValues
@@ -47,7 +48,7 @@ assert jiraR.installApp("https://marketplace.atlassian.com/download/apps/1217750
 
 
 InsightManagerForScriptrunner im = new InsightManagerForScriptrunner()
-ImportSourceConfigurationFacadeImpl importFacade = im.importFacade
+ImportSourceConfigurationFacade importFacade = im.importFacade
 
 
 //Create Object Type
